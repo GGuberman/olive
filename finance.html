@@ -41,8 +41,8 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM
 .q-desc{font-size:0.72rem;color:var(--muted);line-height:1.7;margin-bottom:28px}
 .choices{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
 .choice{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all 0.15s;background:transparent}
-.choice:hover{border-color:var(--accent);background:rgba(201,169,110,0.04)}
-.choice.selected{border-color:var(--accent);background:rgba(201,169,110,0.08)}
+.choice:hover{border-color:var(--accent);background:rgba(155,127,232,0.04)}
+.choice.selected{border-color:var(--accent);background:rgba(155,127,232,0.08)}
 .choice-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;transition:all 0.15s}
 .choice.selected .choice-dot{border-color:var(--accent);background:var(--accent)}
 .choice-label{font-size:0.82rem;color:var(--muted)}
@@ -64,8 +64,8 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM
 .btn-row{display:flex;gap:10px;margin-top:28px;justify-content:space-between;align-items:center}
 .template-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
 .template-card{padding:16px;border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all 0.15s}
-.template-card:hover{border-color:var(--accent);background:rgba(201,169,110,0.04)}
-.template-card.selected{border-color:var(--accent);background:rgba(201,169,110,0.08)}
+.template-card:hover{border-color:var(--accent);background:rgba(155,127,232,0.04)}
+.template-card.selected{border-color:var(--accent);background:rgba(155,127,232,0.08)}
 .t-icon{font-size:1.4rem;margin-bottom:8px}
 .t-name{font-size:0.82rem;color:var(--text);margin-bottom:4px}
 .t-desc{font-size:0.65rem;color:var(--muted);line-height:1.5}
@@ -93,14 +93,14 @@ header h1{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:400;
 .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:20px}
 .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative}
-.card.gold{border-color:var(--accent);background:#191510}
+.card.gold{border-color:var(--accent);background:#1c1428}
 .card.green{border-color:#3a6650;background:#0f1a13}
 .card-label{font-size:0.6rem;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
 .card-value{font-family:'Playfair Display',serif;font-size:1.9rem}
 .card-value.xl{font-size:2.5rem}
 .card-value.c-gold{color:var(--accent2)}.card-value.c-green{color:var(--green)}.card-value.c-warn{color:var(--warn)}.card-value.c-red{color:var(--red)}
 .card-sub{font-size:0.63rem;color:var(--muted);margin-top:6px;line-height:1.7}
-.est-badge{display:inline-block;font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;background:#2a2010;color:var(--accent);border:1px solid #4a3a18;border-radius:3px;padding:1px 5px;margin-left:6px;vertical-align:middle}
+.est-badge{display:inline-block;font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;background:#1c1428;color:var(--accent);border:1px solid #3a2a55;border-radius:3px;padding:1px 5px;margin-left:6px;vertical-align:middle}
 .edit-overlay{position:absolute;inset:0;background:transparent;cursor:text;border-radius:12px}
 .inline-edit{background:transparent;border:none;border-bottom:1px solid var(--accent);color:var(--text);font-family:'Playfair Display',serif;font-size:1.9rem;outline:none;width:100%;padding:2px 0}
 .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:20px}
@@ -121,7 +121,7 @@ canvas{max-height:260px}
 .divider{border:none;border-top:1px solid var(--border);margin:28px 0}
 .scenario-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
 .scenario-card{border:1px solid var(--border);border-radius:10px;padding:16px;position:relative}
-.scenario-card.active{border-color:var(--accent);background:rgba(201,169,110,0.05)}
+.scenario-card.active{border-color:var(--accent);background:rgba(155,127,232,0.05)}
 .scenario-label{font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
 .scenario-rate{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--accent2);margin-bottom:4px}
 .scenario-eta{font-size:0.72rem;color:var(--muted)}
@@ -165,7 +165,7 @@ input[type=file]{display:none}
 .sug-btn:hover{border-color:var(--accent);color:var(--accent)}
 
 /* ── Upload reminder banner ── */
-#upload-banner{display:none;background:#1a1612;border:1px solid var(--accent);border-radius:10px;padding:14px 20px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;font-size:0.73rem}
+#upload-banner{display:none;background:#161020;border:1px solid var(--accent);border-radius:10px;padding:14px 20px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;font-size:0.73rem}
 #upload-banner.hidden{display:none}
 .banner-text{color:var(--accent2)}
 .banner-actions{display:flex;gap:8px}
@@ -199,7 +199,7 @@ input[type=file]{display:none}
 <body>
 
 <div style="position:fixed;top:12px;left:12px;z-index:999">
-    <a href="index.html" style="background:#161618;border:1px solid #2a2a2e;border-radius:6px;padding:5px 10px;color:#c9a96e;font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;text-decoration:none">← Fig</a>
+    <a href="index.html" style="background:#12121a;border:1px solid #252535;border-radius:6px;padding:5px 10px;color:#c4aaff;font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;text-decoration:none">← Fig</a>
   </div>
   <div id="app-loading">Loading Fig...</div>
 <div id="passcode-screen">
@@ -878,7 +878,7 @@ function buildRuleBasedConfig() {
   const goalType = obState.answers.q1 || 'general';
   const priorityCats = (obState.answers.q5||[]).map(v=>({food:'Food & Dining',transport:'Transport',housing:'Housing',travel:'Travel',health:'Health',education:'Education',savings:'Savings Rate'}[v]||v));
   const catSuggestions = [
-    {name:'Food & Dining',budget:Math.round(takeHome*0.12),color:'#c9a96e',priority:priorityCats.includes('Food & Dining')},
+    {name:'Food & Dining',budget:Math.round(takeHome*0.12),color:'#c4aaff',priority:priorityCats.includes('Food & Dining')},
     {name:'Groceries',budget:Math.round(takeHome*0.06),color:'#8ab4e8',priority:false},
     {name:'Transport',budget:Math.round(takeHome*0.07),color:'#7ec8a0',priority:priorityCats.includes('Transport')},
     {name:'Delivery / Takeout',budget:Math.round(takeHome*0.03),color:'#e07070',priority:false},
@@ -1093,7 +1093,7 @@ function renderBreakdown(config, months, selectedKey) {
     return `<div class="budget-row">
       <span class="b-label">${c.priority?'<span class="priority-dot"></span>':''} ${c.name}</span>
       <div class="b-bars">
-        <div class="b-bar" style="width:${budgetPct}%;background:rgba(201,169,110,0.3)"></div>
+        <div class="b-bar" style="width:${budgetPct}%;background:rgba(155,127,232,0.3)"></div>
         ${actual>0?`<div class="b-bar" style="width:${actualPct}%;background:${over?'var(--red)':'var(--green)'};opacity:0.85"></div>`:''}
       </div>
       <span class="b-amounts">
@@ -1127,8 +1127,8 @@ function buildPie(config, months, key) {
   if (charts.pie) charts.pie.destroy();
   charts.pie = new Chart(document.getElementById('pie-chart'), {
     type:'doughnut',
-    data:{labels:nonZero.map(c=>c.name),datasets:[{data:nzData,backgroundColor:nonZero.map(c=>c.color),borderColor:'#161618',borderWidth:3,hoverOffset:8}]},
-    options:{plugins:{legend:{position:'right',labels:{color:'#9a9890',font:{family:'DM Mono',size:9},boxWidth:8,padding:8}},tooltip:{callbacks:{label:ctx=>` $${Number(ctx.raw).toLocaleString()}/mo`}}},cutout:'60%'}
+    data:{labels:nonZero.map(c=>c.name),datasets:[{data:nzData,backgroundColor:nonZero.map(c=>c.color),borderColor:'#12121a',borderWidth:3,hoverOffset:8}]},
+    options:{plugins:{legend:{position:'right',labels:{color:'#8a8aa0',font:{family:'DM Mono',size:9},boxWidth:8,padding:8}},tooltip:{callbacks:{label:ctx=>` $${Number(ctx.raw).toLocaleString()}/mo`}}},cutout:'60%'}
   });
 }
 
@@ -1145,10 +1145,10 @@ function buildStack(config, months, monthKeys, monthLabels) {
     },
     options:{
       scales:{
-        x:{stacked:true,ticks:{color:'#7a7870',font:{family:'DM Mono',size:9}},grid:{color:'#2a2a2e'}},
-        y:{stacked:true,ticks:{color:'#7a7870',font:{family:'DM Mono',size:10},callback:v=>'$'+Math.round(v/1000)+'k'},grid:{color:'#2a2a2e'}}
+        x:{stacked:true,ticks:{color:'#6b6880',font:{family:'DM Mono',size:9}},grid:{color:'#252535'}},
+        y:{stacked:true,ticks:{color:'#6b6880',font:{family:'DM Mono',size:10},callback:v=>'$'+Math.round(v/1000)+'k'},grid:{color:'#252535'}}
       },
-      plugins:{legend:{labels:{color:'#9a9890',font:{family:'DM Mono',size:9},boxWidth:8,padding:6}},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: $${Math.round(ctx.raw).toLocaleString()}`}}}
+      plugins:{legend:{labels:{color:'#8a8aa0',font:{family:'DM Mono',size:9},boxWidth:8,padding:6}},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: $${Math.round(ctx.raw).toLocaleString()}`}}}
     }
   });
 }
@@ -1194,11 +1194,11 @@ function renderGoal(config, months) {
     data:{
       labels:years.map(y=>String(new Date().getFullYear()+y)),
       datasets:[
-        {label:'Savings',data:balances,borderColor:'var(--accent)',backgroundColor:'rgba(201,169,110,0.1)',borderWidth:2,pointRadius:0,fill:true,tension:0.4},
+        {label:'Savings',data:balances,borderColor:'var(--accent)',backgroundColor:'rgba(155,127,232,0.1)',borderWidth:2,pointRadius:0,fill:true,tension:0.4},
         ...(config.targetAmount?[{label:'Goal',data:years.map(()=>config.targetAmount),borderColor:'rgba(126,200,160,0.4)',borderDash:[5,3],borderWidth:1,pointRadius:0,fill:false}]:[])
       ]
     },
-    options:{scales:{x:{ticks:{color:'#7a7870',font:{family:'DM Mono',size:9},maxTicksLimit:5},grid:{color:'#2a2a2e'}},y:{ticks:{color:'#7a7870',font:{family:'DM Mono',size:9},callback:v=>fmtK(v)},grid:{color:'#2a2a2e'}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmtK(ctx.raw)}}}}
+    options:{scales:{x:{ticks:{color:'#6b6880',font:{family:'DM Mono',size:9},maxTicksLimit:5},grid:{color:'#252535'}},y:{ticks:{color:'#6b6880',font:{family:'DM Mono',size:9},callback:v=>fmtK(v)},grid:{color:'#252535'}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmtK(ctx.raw)}}}}
   });
 }
 
@@ -1225,8 +1225,8 @@ function renderNetWorth(config) {
   if (charts.ret) charts.ret.destroy();
   charts.ret = new Chart(document.getElementById('ret-chart'), {
     type:'line',
-    data:{labels:years.map(y=>y===0?'Now':`Age ${(ret.age||30)+y}`),datasets:[{label:'401(k)',data:balances,borderColor:'#c9a96e',backgroundColor:'rgba(201,169,110,0.1)',borderWidth:2,pointRadius:0,fill:true,tension:0.4}]},
-    options:{scales:{x:{ticks:{color:'#7a7870',font:{family:'DM Mono',size:9},maxTicksLimit:7},grid:{color:'#2a2a2e'}},y:{ticks:{color:'#7a7870',font:{family:'DM Mono',size:10},callback:v=>fmtK(v)},grid:{color:'#2a2a2e'}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmtK(ctx.raw)}}}}
+    data:{labels:years.map(y=>y===0?'Now':`Age ${(ret.age||30)+y}`),datasets:[{label:'401(k)',data:balances,borderColor:'#c4aaff',backgroundColor:'rgba(155,127,232,0.1)',borderWidth:2,pointRadius:0,fill:true,tension:0.4}]},
+    options:{scales:{x:{ticks:{color:'#6b6880',font:{family:'DM Mono',size:9},maxTicksLimit:7},grid:{color:'#252535'}},y:{ticks:{color:'#6b6880',font:{family:'DM Mono',size:10},callback:v=>fmtK(v)},grid:{color:'#252535'}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmtK(ctx.raw)}}}}
   });
 }
 
@@ -1581,9 +1581,18 @@ async function init() {
 }
 
 init().catch(e => {
-  document.getElementById('app-loading').textContent = 'Error loading Fig: ' + e.message;
+  console.error('Fig init error:', e);
+  const el = document.getElementById('app-loading');
+  if (el) {
+    el.style.display = 'flex';
+    el.style.flexDirection = 'column';
+    el.style.gap = '8px';
+    el.style.padding = '0 24px';
+    el.style.textAlign = 'center';
+    el.style.color = 'var(--red)';
+    el.innerHTML = `Error loading Fig: ${e.message}<br><span style="color:var(--muted);font-size:0.7rem">Check the browser console, then reload. If this keeps happening, click Settings to reset.</span>`;
+  }
 });
-init();
 
 </script>
 </body>
