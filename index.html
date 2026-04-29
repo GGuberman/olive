@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fig</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Fraunces:opsz,wght,SOFT@9..144,300..600,30..100&display=swap');
 
 :root {
   --bg:#0a0a0f; --surface:#12121a; --surface2:#1a1a26; --border:#252535;
@@ -13,13 +13,13 @@
   --text:#e8e4f0; --muted:#6b6880; --green:#7ec8a0; --red:#e07070; --warn:#e8a870;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM Mono',monospace}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
 body{display:flex;flex-direction:column;min-height:100vh}
 
 .top-bar{padding:24px 32px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
-.wordmark{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--accent2);letter-spacing:-0.02em}
+.wordmark{font-family:'Fraunces',serif;font-size:1.6rem;color:var(--accent2);letter-spacing:-0.02em}
 .wordmark-tag{font-size:0.58rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-top:2px}
-.top-btn{background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:'DM Mono',monospace;font-size:0.65rem;padding:7px 13px;cursor:pointer;letter-spacing:0.06em;transition:all 0.15s}
+.top-btn{background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:0.65rem;padding:7px 13px;cursor:pointer;letter-spacing:0.06em;transition:all 0.15s}
 .top-btn:hover{border-color:var(--accent);color:var(--accent2)}
 
 main{flex:1;padding:40px 32px;max-width:980px;margin:0 auto;width:100%}
@@ -29,10 +29,10 @@ main{flex:1;padding:40px 32px;max-width:980px;margin:0 auto;width:100%}
 .wiki-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
 .wiki-eyebrow{font-size:0.58rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
 .wiki-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:18px;flex-wrap:wrap}
-.wiki-title{font-family:'Playfair Display',serif;font-size:1.55rem;color:var(--text);line-height:1.25}
+.wiki-title{font-family:'Fraunces',serif;font-size:1.55rem;color:var(--text);line-height:1.25}
 .wiki-sub{font-size:0.7rem;color:var(--muted);line-height:1.7;margin-top:6px;max-width:540px}
 .wiki-meta{display:flex;gap:18px;font-size:0.62rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase}
-.wiki-meta b{color:var(--accent2);font-weight:500;letter-spacing:0;text-transform:none;font-family:'Playfair Display',serif;font-size:0.95rem;display:block;margin-bottom:2px}
+.wiki-meta b{color:var(--accent2);font-weight:500;letter-spacing:0;text-transform:none;font-family:'Fraunces',serif;font-size:0.95rem;display:block;margin-bottom:2px}
 
 .wiki-body{display:grid;grid-template-columns:1.4fr 1fr;gap:24px;margin-top:8px}
 .wiki-section-label{font-size:0.58rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
@@ -49,11 +49,11 @@ main{flex:1;padding:40px 32px;max-width:980px;margin:0 auto;width:100%}
 .wiki-input{margin-top:22px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;transition:border-color 0.15s}
 .wiki-input:focus-within{border-color:var(--accent)}
 .wiki-input-label{font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)}
-.wiki-input textarea{width:100%;background:transparent;border:none;color:var(--text);font-family:'DM Mono',monospace;font-size:0.8rem;outline:none;resize:vertical;min-height:54px;line-height:1.6}
+.wiki-input textarea{width:100%;background:transparent;border:none;color:var(--text);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:0.8rem;outline:none;resize:vertical;min-height:54px;line-height:1.6}
 .wiki-input textarea::placeholder{color:var(--muted)}
 .wiki-input-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .wiki-hint{font-size:0.6rem;color:var(--muted);line-height:1.5}
-.wiki-send{background:var(--accent);border:none;border-radius:8px;color:#0e0e0f;font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;padding:8px 16px;cursor:pointer;font-weight:500;transition:opacity 0.15s}
+.wiki-send{background:var(--accent);border:none;border-radius:8px;color:#0e0e0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;padding:8px 16px;cursor:pointer;font-weight:500;transition:opacity 0.15s}
 .wiki-send:hover{opacity:0.85}
 .wiki-send:disabled{opacity:0.4;cursor:not-allowed}
 .wiki-toast{margin-top:10px;font-size:0.65rem;color:var(--green);min-height:1em}
@@ -66,7 +66,7 @@ main{flex:1;padding:40px 32px;max-width:980px;margin:0 auto;width:100%}
 .tracker-card:hover::after{opacity:1}
 .tracker-icon{font-size:1.5rem;margin-bottom:14px}
 .tracker-sub{font-size:0.58rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
-.tracker-name{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.tracker-name{font-family:'Fraunces',serif;font-size:1.25rem;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px}
 .tracker-desc{font-size:0.7rem;color:var(--muted);line-height:1.7;margin-bottom:18px;flex:1}
 .tracker-stats{border-top:1px solid var(--border);padding-top:14px;margin-top:auto;display:flex;flex-direction:column;gap:7px}
 .stat-row{display:flex;justify-content:space-between;font-size:0.68rem}
@@ -88,7 +88,7 @@ main{flex:1;padding:40px 32px;max-width:980px;margin:0 auto;width:100%}
 .earn-section::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2),#e07070,#e8a870)}
 .earn-eyebrow{font-size:0.58rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
 .earn-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
-.earn-title{font-family:'Playfair Display',serif;font-size:1.35rem;color:var(--text)}
+.earn-title{font-family:'Fraunces',serif;font-size:1.35rem;color:var(--text)}
 .coming-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)}
 .earn-desc{font-size:0.72rem;color:var(--muted);line-height:1.8;margin-bottom:24px;max-width:600px}
 .earn-features{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:24px}
@@ -104,7 +104,7 @@ main{flex:1;padding:40px 32px;max-width:980px;margin:0 auto;width:100%}
 .modal-overlay.open{display:flex}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:480px;max-width:92vw;max-height:85vh;overflow-y:auto}
 .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.modal-title{font-family:'Playfair Display',serif;font-size:1.1rem}
+.modal-title{font-family:'Fraunces',serif;font-size:1.1rem}
 .modal-close{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:2px 8px}
 .preset-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px}
 .preset-item{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer}
@@ -117,8 +117,8 @@ main{flex:1;padding:40px 32px;max-width:980px;margin:0 auto;width:100%}
 .color-field-label{font-size:0.6rem;color:var(--muted)}
 .color-field-row{display:flex;align-items:center;gap:8px}
 .color-field-row input[type=color]{width:28px;height:28px;border:1px solid var(--border);border-radius:4px;padding:0;background:transparent;cursor:pointer}
-.color-hex{font-size:0.65rem;color:var(--muted);font-family:'DM Mono',monospace}
-.reset-btn{width:100%;padding:10px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:'DM Mono',monospace;font-size:0.7rem;cursor:pointer;letter-spacing:0.08em;transition:all 0.15s}
+.color-hex{font-size:0.65rem;color:var(--muted);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
+.reset-btn{width:100%;padding:10px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:0.7rem;cursor:pointer;letter-spacing:0.08em;transition:all 0.15s}
 .reset-btn:hover{border-color:var(--accent);color:var(--accent)}
 
 footer{padding:20px 32px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:0.6rem;color:var(--muted)}
@@ -142,7 +142,7 @@ footer{padding:20px 32px;border-top:1px solid var(--border);display:flex;justify
 <div class="top-bar">
   <div>
     <div class="wordmark">Fig</div>
-    <div class="wordmark-tag">A wiki you write by living</div>
+    <div class="wordmark-tag">Your own personal wiki</div>
   </div>
   <button class="top-btn" onclick="openTheme()">🎨 Theme</button>
 </div>
@@ -280,6 +280,7 @@ footer{padding:20px 32px;border-top:1px solid var(--border);display:flex;justify
 const THEME_KEY = 'fig_theme_v1';
 const PRESETS = [
   {name:'Fig Dark',      bg:'#0a0a0f',surface:'#12121a',surface2:'#1a1a26',border:'#252535',accent:'#9b7fe8',accent2:'#c4aaff',text:'#e8e4f0',muted:'#6b6880'},
+  {name:'Fig Light',     bg:'#f5f7f2',surface:'#ffffff',surface2:'#eef2e8',border:'#d8e0d0',accent:'#2f7d4a',accent2:'#4a9d6a',text:'#1a2e1d',muted:'#5a6a52'},
   {name:'Midnight Gold', bg:'#0e0e0f',surface:'#161618',surface2:'#1e1e21',border:'#2a2a2e',accent:'#c9a96e',accent2:'#e8c98a',text:'#e8e4dc',muted:'#7a7870'},
   {name:'Forest',        bg:'#0a0f0b',surface:'#121a13',surface2:'#1a2620',border:'#253528',accent:'#7ec8a0',accent2:'#a8e4c0',text:'#e0ede4',muted:'#6a8070'},
   {name:'Slate',         bg:'#0d0f14',surface:'#14161e',surface2:'#1c2030',border:'#282c3e',accent:'#8ab4e8',accent2:'#aad0ff',text:'#dde4f0',muted:'#6878a0'},

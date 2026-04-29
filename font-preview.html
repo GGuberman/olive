@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Fig — font preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..700,0..100,0..1&family=Instrument+Serif:ital@0;1&family=Spectral:wght@300;400;500;600&family=Lora:wght@400;500;600&family=Newsreader:opsz,wght@6..72,300..700&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=EB+Garamond:wght@400;500;600&family=Playfair+Display:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#12121a;--surface2:#1a1a26;--border:#252535;--accent:#9b7fe8;--accent2:#c4aaff;--text:#e8e4f0;--muted:#6b6880;--green:#7ec8a0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);min-height:100vh;padding:32px;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+.intro{max-width:860px;margin:0 auto 32px;color:var(--muted);font-size:14px;line-height:1.7}
+.intro b{color:var(--accent2);font-weight:500}
+.intro a{color:var(--accent);text-decoration:none}
+.toggle-row{max-width:860px;margin:0 auto 24px;display:flex;gap:8px;flex-wrap:wrap}
+.toggle{padding:8px 14px;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--muted);font-family:inherit;font-size:12px;cursor:pointer;letter-spacing:0.06em;text-transform:uppercase}
+.toggle.active{border-color:var(--accent);color:var(--accent2);background:var(--surface)}
+
+.specimen{max-width:860px;margin:0 auto 28px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:32px;position:relative;overflow:hidden}
+.specimen::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));opacity:0.6}
+.label{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.label-name{font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)}
+.label-pick{font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:11px;color:var(--accent2);background:transparent;border:1px solid var(--accent);border-radius:14px;padding:4px 10px;cursor:pointer;letter-spacing:0.06em;text-transform:uppercase}
+.label-pick:hover{background:var(--accent);color:#0e0e0f}
+.heading{font-size:34px;line-height:1.15;margin-bottom:6px;color:var(--text)}
+.tag{font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:24px}
+.body{font-size:14px;line-height:1.75;color:var(--text);max-width:560px}
+.body p{margin-bottom:14px}
+.body em{color:var(--accent2);font-style:italic}
+.meta{display:flex;gap:24px;margin-top:18px;font-size:12px;color:var(--muted)}
+.meta b{display:block;color:var(--accent2);font-weight:500;font-size:18px;margin-bottom:2px}
+.numerals{font-feature-settings:"tnum";color:var(--muted);font-size:12px;margin-top:14px;letter-spacing:0.04em}
+
+/* ── Specimen 1 — Inter + Fraunces ── */
+#s1 .heading{font-family:'Fraunces',serif;font-variation-settings:"opsz" 144,"SOFT" 50,"WONK" 0;font-weight:400}
+#s1 .body,#s1 .tag,#s1 .meta{font-family:'Inter',sans-serif}
+#s1 .body{font-weight:400}
+#s1 .meta b{font-family:'Fraunces',serif;font-weight:500}
+
+/* ── Specimen 2 — Inter + Instrument Serif ── */
+#s2 .heading{font-family:'Instrument Serif',serif;font-weight:400;letter-spacing:-0.01em}
+#s2 .body,#s2 .tag,#s2 .meta{font-family:'Inter',sans-serif}
+#s2 .meta b{font-family:'Instrument Serif',serif}
+
+/* ── Specimen 3 — Plus Jakarta Sans + Spectral ── */
+#s3 .heading{font-family:'Spectral',serif;font-weight:400}
+#s3 .body,#s3 .tag,#s3 .meta{font-family:'Plus Jakarta Sans',sans-serif}
+#s3 .meta b{font-family:'Spectral',serif;font-weight:500}
+
+/* ── Specimen 4 — Lora throughout ── */
+#s4 .heading{font-family:'Lora',serif;font-weight:500}
+#s4 .body,#s4 .tag,#s4 .meta{font-family:'Lora',serif;font-weight:400}
+#s4 .meta b{font-family:'Lora',serif;font-weight:500}
+
+/* ── Specimen 5 — Newsreader throughout ── */
+#s5 .heading{font-family:'Newsreader',serif;font-variation-settings:"opsz" 36;font-weight:400}
+#s5 .body,#s5 .tag,#s5 .meta{font-family:'Newsreader',serif;font-variation-settings:"opsz" 18;font-weight:400}
+#s5 .meta b{font-family:'Newsreader',serif;font-variation-settings:"opsz" 36;font-weight:500}
+
+/* ── Specimen 6 — EB Garamond + Inter ── */
+#s6 .heading{font-family:'EB Garamond',serif;font-weight:500;letter-spacing:-0.01em}
+#s6 .body,#s6 .tag,#s6 .meta{font-family:'Inter',sans-serif}
+#s6 .meta b{font-family:'EB Garamond',serif;font-weight:500}
+
+/* ── Reference: current Fig (Playfair + DM Mono) ── */
+#sref{opacity:0.7}
+#sref .heading{font-family:'Playfair Display',serif;font-weight:400}
+#sref .body,#sref .tag,#sref .meta{font-family:'DM Mono',monospace;font-weight:400;font-size:13px}
+#sref .meta b{font-family:'Playfair Display',serif;font-weight:500}
+
+/* Light theme preview support */
+body.light{background:#f5f6f1;color:#1a2e1d}
+body.light .specimen{background:#ffffff;border-color:#dde2d4}
+body.light .specimen::before{background:linear-gradient(90deg,#2f7d4a,#7ec8a0);opacity:0.8}
+body.light .label{border-color:#dde2d4}
+body.light .label-name,body.light .tag,body.light .meta,body.light .numerals{color:#5a6a52}
+body.light .label-pick{color:#2f7d4a;border-color:#2f7d4a}
+body.light .label-pick:hover{background:#2f7d4a;color:#fff}
+body.light .body em,body.light .meta b,body.light .heading{color:#1a2e1d}
+body.light .heading{color:#1a2e1d}
+body.light .toggle{color:#5a6a52;border-color:#dde2d4}
+body.light .toggle.active{background:#fff;border-color:#2f7d4a;color:#2f7d4a}
+body.light .intro{color:#5a6a52}
+body.light .intro b{color:#2f7d4a}
+body.light .intro a{color:#2f7d4a}
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <p style="margin-bottom:12px"><b>Fig — font preview.</b> Each block below is the same content rendered in a different font pair. Look at all six, click <b>Use this</b> on the one you like, and tell me which.</p>
+  <p>The reference at the bottom is what Fig uses today (Playfair + DM Mono) for comparison.</p>
+</div>
+
+<div class="toggle-row">
+  <button class="toggle active" onclick="setMode('dark')">Dark preview</button>
+  <button class="toggle" onclick="setMode('light')">Light preview (green + white)</button>
+</div>
+
+<!-- ─────────── 1: Inter + Fraunces ─────────── -->
+<section class="specimen" id="s1">
+  <div class="label">
+    <span class="label-name">1 · Inter (body) + Fraunces (heading)</span>
+    <button class="label-pick" onclick="pick(1)">Use this</button>
+  </div>
+  <div class="tag">YOUR OWN PERSONAL WIKI</div>
+  <div class="heading">Good morning.</div>
+  <div class="body">
+    <p>You've logged <em>23 entries</em> and you're on a <em>9-day streak</em>. Cash flow: averaging $1,840/mo savings across the last 3 months. Weight: <em>184.2 lbs</em> (down 5.8 from 190).</p>
+    <p>Slept 7h, ran 5k. Bought groceries $84. Set a new goal: save $5,000 by August.</p>
+  </div>
+  <div class="meta">
+    <div><b>9</b>day streak</div>
+    <div><b>23</b>entries</div>
+    <div><b>Mar '25</b>writing since</div>
+  </div>
+  <div class="numerals">$8,400 / $50,000 · 184.2 lbs · 2026-04-28 · 7h 14m</div>
+</section>
+
+<!-- ─────────── 2: Inter + Instrument Serif ─────────── -->
+<section class="specimen" id="s2">
+  <div class="label">
+    <span class="label-name">2 · Inter (body) + Instrument Serif (heading)</span>
+    <button class="label-pick" onclick="pick(2)">Use this</button>
+  </div>
+  <div class="tag">YOUR OWN PERSONAL WIKI</div>
+  <div class="heading">Good morning.</div>
+  <div class="body">
+    <p>You've logged <em>23 entries</em> and you're on a <em>9-day streak</em>. Cash flow: averaging $1,840/mo savings across the last 3 months. Weight: <em>184.2 lbs</em> (down 5.8 from 190).</p>
+    <p>Slept 7h, ran 5k. Bought groceries $84. Set a new goal: save $5,000 by August.</p>
+  </div>
+  <div class="meta">
+    <div><b>9</b>day streak</div>
+    <div><b>23</b>entries</div>
+    <div><b>Mar '25</b>writing since</div>
+  </div>
+  <div class="numerals">$8,400 / $50,000 · 184.2 lbs · 2026-04-28 · 7h 14m</div>
+</section>
+
+<!-- ─────────── 3: Plus Jakarta Sans + Spectral ─────────── -->
+<section class="specimen" id="s3">
+  <div class="label">
+    <span class="label-name">3 · Plus Jakarta Sans (body) + Spectral (heading)</span>
+    <button class="label-pick" onclick="pick(3)">Use this</button>
+  </div>
+  <div class="tag">YOUR OWN PERSONAL WIKI</div>
+  <div class="heading">Good morning.</div>
+  <div class="body">
+    <p>You've logged <em>23 entries</em> and you're on a <em>9-day streak</em>. Cash flow: averaging $1,840/mo savings across the last 3 months. Weight: <em>184.2 lbs</em> (down 5.8 from 190).</p>
+    <p>Slept 7h, ran 5k. Bought groceries $84. Set a new goal: save $5,000 by August.</p>
+  </div>
+  <div class="meta">
+    <div><b>9</b>day streak</div>
+    <div><b>23</b>entries</div>
+    <div><b>Mar '25</b>writing since</div>
+  </div>
+  <div class="numerals">$8,400 / $50,000 · 184.2 lbs · 2026-04-28 · 7h 14m</div>
+</section>
+
+<!-- ─────────── 4: Lora throughout ─────────── -->
+<section class="specimen" id="s4">
+  <div class="label">
+    <span class="label-name">4 · Lora (all serif, journal feel)</span>
+    <button class="label-pick" onclick="pick(4)">Use this</button>
+  </div>
+  <div class="tag">YOUR OWN PERSONAL WIKI</div>
+  <div class="heading">Good morning.</div>
+  <div class="body">
+    <p>You've logged <em>23 entries</em> and you're on a <em>9-day streak</em>. Cash flow: averaging $1,840/mo savings across the last 3 months. Weight: <em>184.2 lbs</em> (down 5.8 from 190).</p>
+    <p>Slept 7h, ran 5k. Bought groceries $84. Set a new goal: save $5,000 by August.</p>
+  </div>
+  <div class="meta">
+    <div><b>9</b>day streak</div>
+    <div><b>23</b>entries</div>
+    <div><b>Mar '25</b>writing since</div>
+  </div>
+  <div class="numerals">$8,400 / $50,000 · 184.2 lbs · 2026-04-28 · 7h 14m</div>
+</section>
+
+<!-- ─────────── 5: Newsreader throughout ─────────── -->
+<section class="specimen" id="s5">
+  <div class="label">
+    <span class="label-name">5 · Newsreader (Google's editorial serif, all-serif)</span>
+    <button class="label-pick" onclick="pick(5)">Use this</button>
+  </div>
+  <div class="tag">YOUR OWN PERSONAL WIKI</div>
+  <div class="heading">Good morning.</div>
+  <div class="body">
+    <p>You've logged <em>23 entries</em> and you're on a <em>9-day streak</em>. Cash flow: averaging $1,840/mo savings across the last 3 months. Weight: <em>184.2 lbs</em> (down 5.8 from 190).</p>
+    <p>Slept 7h, ran 5k. Bought groceries $84. Set a new goal: save $5,000 by August.</p>
+  </div>
+  <div class="meta">
+    <div><b>9</b>day streak</div>
+    <div><b>23</b>entries</div>
+    <div><b>Mar '25</b>writing since</div>
+  </div>
+  <div class="numerals">$8,400 / $50,000 · 184.2 lbs · 2026-04-28 · 7h 14m</div>
+</section>
+
+<!-- ─────────── 6: EB Garamond + Inter ─────────── -->
+<section class="specimen" id="s6">
+  <div class="label">
+    <span class="label-name">6 · EB Garamond (heading) + Inter (body)</span>
+    <button class="label-pick" onclick="pick(6)">Use this</button>
+  </div>
+  <div class="tag">YOUR OWN PERSONAL WIKI</div>
+  <div class="heading">Good morning.</div>
+  <div class="body">
+    <p>You've logged <em>23 entries</em> and you're on a <em>9-day streak</em>. Cash flow: averaging $1,840/mo savings across the last 3 months. Weight: <em>184.2 lbs</em> (down 5.8 from 190).</p>
+    <p>Slept 7h, ran 5k. Bought groceries $84. Set a new goal: save $5,000 by August.</p>
+  </div>
+  <div class="meta">
+    <div><b>9</b>day streak</div>
+    <div><b>23</b>entries</div>
+    <div><b>Mar '25</b>writing since</div>
+  </div>
+  <div class="numerals">$8,400 / $50,000 · 184.2 lbs · 2026-04-28 · 7h 14m</div>
+</section>
+
+<!-- ─────────── Reference: current Fig (Playfair + DM Mono) ─────────── -->
+<section class="specimen" id="sref">
+  <div class="label">
+    <span class="label-name">REFERENCE · Playfair Display + DM Mono (current)</span>
+  </div>
+  <div class="tag">A WIKI YOU WRITE BY LIVING</div>
+  <div class="heading">Good morning.</div>
+  <div class="body">
+    <p>You've logged <em>23 entries</em> and you're on a <em>9-day streak</em>. Cash flow: averaging $1,840/mo savings across the last 3 months. Weight: <em>184.2 lbs</em> (down 5.8 from 190).</p>
+    <p>Slept 7h, ran 5k. Bought groceries $84. Set a new goal: save $5,000 by August.</p>
+  </div>
+  <div class="meta">
+    <div><b>9</b>day streak</div>
+    <div><b>23</b>entries</div>
+    <div><b>Mar '25</b>writing since</div>
+  </div>
+  <div class="numerals">$8,400 / $50,000 · 184.2 lbs · 2026-04-28 · 7h 14m</div>
+</section>
+
+<script>
+function setMode(m){
+  document.body.classList.toggle('light', m === 'light');
+  document.querySelectorAll('.toggle').forEach((b,i)=>{
+    b.classList.toggle('active', (i===0&&m==='dark')||(i===1&&m==='light'));
+  });
+}
+function pick(n){
+  const names = ['','Inter + Fraunces','Inter + Instrument Serif','Plus Jakarta Sans + Spectral','Lora (all-serif)','Newsreader (all-serif)','EB Garamond + Inter'];
+  alert('Picked option ' + n + ': ' + names[n] + '\\n\\nTell me this number in chat and I\\'ll wire it up across all three pages.');
+}
+</script>
+</body>
+</html>
