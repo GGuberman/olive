@@ -21,6 +21,10 @@ body{display:flex;flex-direction:column;min-height:100vh}
 .wordmark-tag{font-size:0.58rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-top:2px}
 .top-btn{background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:0.65rem;padding:7px 13px;cursor:pointer;letter-spacing:0.06em;transition:all 0.15s}
 .top-btn:hover{border-color:var(--accent);color:var(--accent2)}
+.top-actions{display:flex;align-items:center;gap:10px}
+.auth-chip{font-size:0.6rem;letter-spacing:0.08em;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:5px 11px;display:flex;align-items:center;gap:6px}
+.auth-chip .dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+.auth-chip b{font-weight:500;color:var(--accent2)}
 
 main{flex:1;padding:40px 32px;max-width:980px;margin:0 auto;width:100%}
 
@@ -121,6 +125,46 @@ main{flex:1;padding:40px 32px;max-width:980px;margin:0 auto;width:100%}
 .reset-btn{width:100%;padding:10px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:0.7rem;cursor:pointer;letter-spacing:0.08em;transition:all 0.15s}
 .reset-btn:hover{border-color:var(--accent);color:var(--accent)}
 
+/* ── Settings modal ── */
+.modal.modal-wide{width:560px}
+.settings-tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:22px}
+.settings-tab{background:transparent;border:none;color:var(--muted);font-family:inherit;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;padding:10px 14px;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;margin-bottom:-1px}
+.settings-tab:hover{color:var(--text)}
+.settings-tab.active{color:var(--accent2);border-bottom-color:var(--accent)}
+.settings-pane{display:none;flex-direction:column;gap:16px}
+.settings-pane.active{display:flex}
+.settings-section{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px}
+.settings-section.connected{border-color:var(--green)}
+.settings-section h4{font-family:'Fraunces',serif;font-size:0.95rem;font-weight:500;color:var(--text);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.settings-section .section-meta{font-size:0.65rem;color:var(--muted);line-height:1.7;margin-bottom:12px}
+.settings-section .field-row{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.settings-section label{font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)}
+.settings-section input,.settings-section select{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:9px 12px;color:var(--text);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:0.78rem;outline:none;transition:border-color 0.15s}
+.settings-section input:focus,.settings-section select:focus{border-color:var(--accent)}
+.settings-section .field-help{font-size:0.62rem;color:var(--muted);line-height:1.6}
+.settings-section .field-help a{color:var(--accent2);text-decoration:none}
+.settings-section .field-help a:hover{text-decoration:underline}
+.btn-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.s-btn{padding:8px 14px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:0.65rem;letter-spacing:0.06em;cursor:pointer;transition:all 0.15s}
+.s-btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent2)}
+.s-btn.primary{background:var(--accent);border-color:var(--accent);color:var(--bg);font-weight:500}
+.s-btn.primary:hover:not(:disabled){opacity:0.85;color:var(--bg)}
+.s-btn.danger{color:var(--red);border-color:var(--border)}
+.s-btn.danger:hover{border-color:var(--red);color:var(--red)}
+.s-btn:disabled{opacity:0.4;cursor:not-allowed}
+.s-toast{font-size:0.62rem;color:var(--muted);min-height:1.1em;flex-basis:100%}
+.s-toast.ok{color:var(--green)}
+.s-toast.err{color:var(--red)}
+.connected-pill{font-size:0.55rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--green);background:transparent;border:1px solid var(--green);border-radius:10px;padding:2px 8px}
+.coming-pill{font-size:0.55rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);background:transparent;border:1px solid var(--border);border-radius:10px;padding:2px 8px}
+.provider-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.provider-pick{padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--muted);font-family:inherit;font-size:0.72rem;cursor:pointer;text-align:left;transition:all 0.15s}
+.provider-pick:hover{border-color:var(--accent);color:var(--text)}
+.provider-pick.active{border-color:var(--accent);background:var(--accent-dim);color:var(--accent2)}
+.provider-pick .pp-name{font-family:'Fraunces',serif;font-size:0.85rem;color:var(--text);margin-bottom:2px}
+.provider-pick.active .pp-name{color:var(--accent2)}
+.provider-pick .pp-desc{font-size:0.6rem;color:var(--muted);line-height:1.5}
+
 footer{padding:20px 32px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:0.6rem;color:var(--muted)}
 .footer-links{display:flex;gap:18px}
 .footer-links a{color:var(--muted);text-decoration:none;transition:color 0.15s}
@@ -144,7 +188,11 @@ footer{padding:20px 32px;border-top:1px solid var(--border);display:flex;justify
     <div class="wordmark">Fig</div>
     <div class="wordmark-tag">Your own personal wiki</div>
   </div>
-  <button class="top-btn" onclick="openTheme()">🎨 Theme</button>
+  <div class="top-actions">
+    <span class="auth-chip" id="auth-chip" style="display:none"></span>
+    <button class="top-btn" onclick="openSettings()">⚙ Settings</button>
+    <button class="top-btn" onclick="openTheme()">🎨 Theme</button>
+  </div>
 </div>
 
 <main>
@@ -271,6 +319,111 @@ footer{padding:20px 32px;border-top:1px solid var(--border);display:flex;justify
       <button class="modal-close" onclick="closeTheme()">✕</button>
     </div>
     <div id="theme-content"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="settings-modal" onclick="if(event.target===this)closeSettings()">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <div class="modal-title">Settings</div>
+      <button class="modal-close" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="settings-tabs">
+      <button class="settings-tab active" data-tab="identity" onclick="setSettingsTab('identity')">Identity</button>
+      <button class="settings-tab" data-tab="llm" onclick="setSettingsTab('llm')">LLM</button>
+      <button class="settings-tab" data-tab="sync" onclick="setSettingsTab('sync')">Cloud sync</button>
+    </div>
+
+    <!-- IDENTITY TAB -->
+    <div class="settings-pane active" id="pane-identity">
+      <div class="settings-section" id="sec-worker">
+        <h4>Username + token <span id="worker-status"></span></h4>
+        <div class="section-meta">Lightweight account on Fig's Cloudflare Worker. A handle, a token, and your data syncs across devices. Custodial — Fig holds the secret.</div>
+        <div id="worker-form">
+          <div class="field-row">
+            <label>Handle</label>
+            <input id="worker-handle" type="text" placeholder="e.g. gg" maxlength="32" autocomplete="off">
+          </div>
+          <div class="btn-row">
+            <button class="s-btn primary" onclick="connectWorker()">Create / sign in</button>
+            <button class="s-btn" onclick="pasteWorkerToken()">I already have a token</button>
+            <span class="s-toast" id="worker-toast"></span>
+          </div>
+        </div>
+        <div id="worker-connected" style="display:none">
+          <div class="field-help">Signed in as <b id="worker-handle-display"></b>. Token stored locally. <a href="#" onclick="copyWorkerToken();return false;">Copy token</a> · <a href="#" onclick="disconnectWorker();return false;">Disconnect</a></div>
+        </div>
+      </div>
+
+      <div class="settings-section" id="sec-bsky">
+        <h4>Bluesky <span id="bsky-status"></span></h4>
+        <div class="section-meta">Sign in with your Bluesky handle. Decentralized identity — Fig never sees your password. Use an <a href="https://bsky.app/settings/app-passwords" target="_blank">app password</a>, not your main password.</div>
+        <div id="bsky-form">
+          <div class="field-row">
+            <label>Handle</label>
+            <input id="bsky-handle" type="text" placeholder="alice.bsky.social" autocomplete="off">
+          </div>
+          <div class="field-row">
+            <label>App password</label>
+            <input id="bsky-pass" type="password" placeholder="xxxx-xxxx-xxxx-xxxx" autocomplete="off">
+          </div>
+          <div class="btn-row">
+            <button class="s-btn primary" onclick="connectBluesky()">Connect Bluesky</button>
+            <span class="s-toast" id="bsky-toast"></span>
+          </div>
+        </div>
+        <div id="bsky-connected" style="display:none">
+          <div class="field-help">Signed in as <b id="bsky-handle-display"></b>. <a href="#" onclick="disconnectBluesky();return false;">Disconnect</a></div>
+        </div>
+      </div>
+
+      <div class="settings-section" id="sec-wid">
+        <h4>World ID <span class="coming-pill">Coming soon</span></h4>
+        <div class="section-meta">Sybil-resistant proof-of-personhood. Pairs with AgentKit so insurers and public programs can fund rebates for verified-good-behavior streaks — without Fig touching your bank credentials. <a href="https://github.com/GGuberman/fig/blob/main/ROADMAP.md" target="_blank">Read the thesis</a>.</div>
+        <button class="s-btn" disabled>Sign in with World ID (preview shipping next session)</button>
+      </div>
+    </div>
+
+    <!-- LLM TAB -->
+    <div class="settings-pane" id="pane-llm">
+      <div class="settings-section">
+        <h4>Connect your LLM</h4>
+        <div class="section-meta">Fig uses your LLM key — never ours. Stored locally, never sent to Fig's servers. <b>Heads up</b>: keys live in <code>localStorage</code>, so don't sign in on a shared computer.</div>
+        <div class="provider-grid" id="provider-grid"></div>
+        <div id="llm-fields"></div>
+        <div class="btn-row">
+          <button class="s-btn primary" onclick="saveLLM()">Save</button>
+          <button class="s-btn" onclick="testLLM()">Test connection</button>
+          <button class="s-btn danger" onclick="clearLLM()">Disconnect</button>
+          <span class="s-toast" id="llm-toast"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLOUD SYNC TAB -->
+    <div class="settings-pane" id="pane-sync">
+      <div class="settings-section">
+        <h4>Cloud sync</h4>
+        <div class="section-meta">Sync your wiki, health, and finance data to your Fig Worker. Local-first stays the default — sync only runs when you click below or enable auto-sync.</div>
+        <div class="field-row">
+          <label>Worker URL</label>
+          <input id="sync-url" type="text" placeholder="https://fig-sync.<your-subdomain>.workers.dev" autocomplete="off">
+          <div class="field-help">Set this to wherever you deployed <code>worker/worker.js</code>. Don't have it deployed yet? From <code>~/Desktop/Fig/worker</code>: <code>npm i -g wrangler && wrangler kv namespace create TRACKER_KV && wrangler deploy</code>. Then paste the printed URL here. Sign in with a handle on the Identity tab.</div>
+        </div>
+        <div class="field-row">
+          <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="sync-auto" style="width:auto"> Auto-sync after every change (debounced 5s)</label>
+        </div>
+        <div class="btn-row">
+          <button class="s-btn primary" onclick="syncNow()">Sync now ↑</button>
+          <button class="s-btn" onclick="pullCloud()">Pull from cloud ↓</button>
+          <button class="s-btn" onclick="exportLocal()">Export JSON</button>
+          <button class="s-btn" onclick="document.getElementById('import-file').click()">Import JSON</button>
+          <input id="import-file" type="file" accept="application/json" style="display:none" onchange="importLocal(event)">
+          <span class="s-toast" id="sync-toast"></span>
+        </div>
+        <div class="field-help" id="sync-status" style="margin-top:10px"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -533,11 +686,376 @@ function sendWiki(){
   toast.style.color='var(--green)';
   toast.textContent='Saved to your wiki inbox. Routing to Health/Finance is coming with the LLM hook-up.';
   setTimeout(()=>{toast.textContent='';},5000);
+  scheduleAutoSync();
+}
+
+// ── Auto-sync (debounced) ─────────────────────────────────────
+let _autoSyncTimer=null;
+function scheduleAutoSync(){
+  const s=getSync(); const acc=getAccount();
+  if (!s.autoSync || !s.workerUrl || !acc.worker?.token) return;
+  clearTimeout(_autoSyncTimer);
+  _autoSyncTimer = setTimeout(() => {
+    // Fire-and-forget — errors surface in Settings → Cloud sync, not here
+    fetch(s.workerUrl+'/data',{
+      method:'PUT',
+      headers:{'Authorization':'Bearer '+acc.worker.token,'Content-Type':'application/json'},
+      body:JSON.stringify(collectLocalState())
+    }).then(r=>r.ok?r.json():null).then(d=>{
+      if (d?.savedAt) { s.lastSyncedAt=d.savedAt; lsSet(SYNC_KEY,s); }
+    }).catch(()=>{});
+  }, 5000);
 }
 
 function createTracker(){
   alert('Custom trackers are coming soon. For now, drop a note in the wiki input above describing what you want to track and Fig will pick it up when the feature lands.');
 }
+
+// ── Settings: identity, LLM, cloud sync ──────────────────────
+const ACCOUNT_KEY = 'fig_account';   // {kind,handle,token,...}
+const LLM_KEY     = 'fig_llm';       // {provider,key,baseUrl}
+const SYNC_KEY    = 'fig_sync';      // {workerUrl,autoSync,lastSyncedAt}
+// Also mirror to legacy keys finance.html already reads:
+//   fig_provider, fig_key  (kept in sync by saveLLM)
+
+const PROVIDERS = [
+  {id:'anthropic',  name:'Claude',   desc:'Anthropic · direct from browser',       keyHelp:'<a href="https://console.anthropic.com/settings/keys" target="_blank">Get a key →</a>',                       defaultBase:'https://api.anthropic.com'},
+  {id:'openrouter', name:'OpenRouter',desc:'~80 models, one key (browser-friendly)',keyHelp:'<a href="https://openrouter.ai/keys" target="_blank">Get a key →</a>',                                       defaultBase:'https://openrouter.ai/api'},
+  {id:'openai',     name:'GPT',      desc:'OpenAI · needs proxy (no browser CORS)',keyHelp:'OpenAI blocks direct browser calls. Set Base URL to your own proxy/gateway. <a href="https://platform.openai.com/api-keys" target="_blank">Get a key →</a>',                            defaultBase:'https://api.openai.com'},
+  {id:'ollama',     name:'Ollama',   desc:'Local · runs on your machine',         keyHelp:'<a href="https://ollama.com/download" target="_blank">Install Ollama →</a> then run <code>OLLAMA_ORIGINS="*" ollama serve</code> so the browser can reach it.', defaultBase:'http://localhost:11434'},
+];
+
+function lsGet(k,fallback){try{const r=localStorage.getItem(k);return r?JSON.parse(r):(fallback||null);}catch{return fallback||null;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+function lsDel(k){try{localStorage.removeItem(k);}catch{}}
+
+function getAccount(){return lsGet(ACCOUNT_KEY)||{};}
+function getLLM(){return lsGet(LLM_KEY)||{};}
+function getSync(){return lsGet(SYNC_KEY)||{};}
+
+function openSettings(){
+  document.getElementById('settings-modal').classList.add('open');
+  renderIdentity();
+  renderLLM();
+  renderSync();
+}
+function closeSettings(){document.getElementById('settings-modal').classList.remove('open');}
+function setSettingsTab(tab){
+  document.querySelectorAll('.settings-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  document.querySelectorAll('.settings-pane').forEach(p=>p.classList.toggle('active',p.id==='pane-'+tab));
+}
+
+// ── Identity rendering ──
+function renderIdentity(){
+  const acc=getAccount();
+  // Worker
+  const wConnected = acc.worker && acc.worker.handle && acc.worker.token;
+  document.getElementById('worker-form').style.display       = wConnected?'none':'';
+  document.getElementById('worker-connected').style.display  = wConnected?'':'none';
+  document.getElementById('sec-worker').classList.toggle('connected',!!wConnected);
+  document.getElementById('worker-status').innerHTML = wConnected?'<span class="connected-pill">connected</span>':'';
+  if (wConnected) document.getElementById('worker-handle-display').textContent = acc.worker.handle;
+  // Bluesky
+  const bConnected = acc.bsky && acc.bsky.handle && acc.bsky.accessJwt;
+  document.getElementById('bsky-form').style.display      = bConnected?'none':'';
+  document.getElementById('bsky-connected').style.display = bConnected?'':'none';
+  document.getElementById('sec-bsky').classList.toggle('connected',!!bConnected);
+  document.getElementById('bsky-status').innerHTML = bConnected?'<span class="connected-pill">connected</span>':'';
+  if (bConnected) document.getElementById('bsky-handle-display').textContent = acc.bsky.handle;
+
+  renderAuthChip();
+}
+
+function renderAuthChip(){
+  const acc=getAccount();
+  const chip=document.getElementById('auth-chip');
+  if (acc.worker?.handle) {
+    chip.style.display='flex';
+    chip.innerHTML=`<span class="dot"></span><b>${acc.worker.handle}</b>`;
+  } else if (acc.bsky?.handle) {
+    chip.style.display='flex';
+    chip.innerHTML=`<span class="dot"></span><b>@${acc.bsky.handle}</b>`;
+  } else {
+    chip.style.display='none';
+  }
+}
+
+async function connectWorker(){
+  const handle=document.getElementById('worker-handle').value.trim();
+  const toast=document.getElementById('worker-toast');
+  toast.className='s-toast';
+  if (!handle) {toast.textContent='Pick a handle first.';toast.classList.add('err');return;}
+  if (!/^[a-zA-Z0-9_-]{2,32}$/.test(handle)) {toast.textContent='Letters, numbers, _ and - only (2–32 chars).';toast.classList.add('err');return;}
+  const sync=getSync();
+  if (!sync.workerUrl) {toast.textContent='Set the Worker URL on the Cloud sync tab first.';toast.classList.add('err');return;}
+  toast.textContent='Connecting…';
+  try {
+    // Try register first; if 409 (taken), tell the user
+    let r = await fetch(sync.workerUrl.replace(/\/$/,'') + '/auth/register', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username:handle})
+    });
+    let d = await r.json();
+    if (!r.ok) {
+      if (r.status===409) {toast.textContent='Handle taken. Use a different one or paste your existing token.';toast.classList.add('err');return;}
+      throw new Error(d.error||('HTTP '+r.status));
+    }
+    const acc=getAccount(); acc.worker={handle:d.username,token:d.token,createdAt:new Date().toISOString()};
+    lsSet(ACCOUNT_KEY,acc);
+    toast.textContent='Connected.'; toast.classList.add('ok');
+    renderIdentity();
+  } catch(e) {
+    toast.textContent='Failed: '+(e.message||e); toast.classList.add('err');
+  }
+}
+
+function pasteWorkerToken(){
+  const handle=document.getElementById('worker-handle').value.trim();
+  const token=prompt('Paste your existing token (the long string from a previous setup):');
+  if (!token) return;
+  if (!handle) {alert('Type your handle in the Handle field first, then click again.');return;}
+  const acc=getAccount(); acc.worker={handle,token,createdAt:new Date().toISOString()};
+  lsSet(ACCOUNT_KEY,acc); renderIdentity();
+}
+
+function copyWorkerToken(){
+  const acc=getAccount();
+  if (!acc.worker?.token) return;
+  navigator.clipboard.writeText(acc.worker.token).then(()=>{
+    const t=document.getElementById('worker-toast');t.className='s-toast ok';t.textContent='Token copied to clipboard.';
+    setTimeout(()=>{t.textContent='';},3000);
+  });
+}
+
+function disconnectWorker(){
+  if (!confirm('Disconnect from the Worker? Your token will be cleared from this device. Cloud data is untouched.')) return;
+  const acc=getAccount(); delete acc.worker; lsSet(ACCOUNT_KEY,acc); renderIdentity();
+}
+
+async function connectBluesky(){
+  const handle=document.getElementById('bsky-handle').value.trim().replace(/^@/,'');
+  const pass=document.getElementById('bsky-pass').value;
+  const toast=document.getElementById('bsky-toast');
+  toast.className='s-toast';
+  if (!handle || !pass) {toast.textContent='Need both handle and app password.';toast.classList.add('err');return;}
+  toast.textContent='Connecting…';
+  try {
+    const r=await fetch('https://bsky.social/xrpc/com.atproto.server.createSession',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({identifier:handle,password:pass})
+    });
+    const d=await r.json();
+    if (!r.ok) throw new Error(d.message||d.error||('HTTP '+r.status));
+    const acc=getAccount();
+    acc.bsky={did:d.did,handle:d.handle,accessJwt:d.accessJwt,refreshJwt:d.refreshJwt,createdAt:new Date().toISOString()};
+    lsSet(ACCOUNT_KEY,acc);
+    document.getElementById('bsky-pass').value='';
+    toast.textContent='Connected as @'+d.handle+'.'; toast.classList.add('ok');
+    renderIdentity();
+  } catch(e) {
+    toast.textContent='Failed: '+(e.message||e)+' (use an app password, not your main password)'; toast.classList.add('err');
+  }
+}
+
+function disconnectBluesky(){
+  if (!confirm('Disconnect Bluesky? Tokens will be cleared from this device.')) return;
+  const acc=getAccount(); delete acc.bsky; lsSet(ACCOUNT_KEY,acc); renderIdentity();
+}
+
+// ── LLM rendering ──
+function renderLLM(){
+  const cur=getLLM();
+  const grid=document.getElementById('provider-grid');
+  grid.innerHTML=PROVIDERS.map(p=>`
+    <button class="provider-pick ${cur.provider===p.id?'active':''}" onclick="pickProvider('${p.id}')">
+      <div class="pp-name">${p.name}</div>
+      <div class="pp-desc">${p.desc}</div>
+    </button>`).join('');
+  renderLLMFields();
+}
+
+function pickProvider(id){
+  const cur=getLLM(); cur.provider=id;
+  // Reset baseUrl when switching to a provider's default
+  const p=PROVIDERS.find(p=>p.id===id);
+  if (p && (!cur.baseUrl || PROVIDERS.some(q=>q.defaultBase===cur.baseUrl))) cur.baseUrl=p.defaultBase;
+  lsSet(LLM_KEY,cur);
+  renderLLM();
+}
+
+function renderLLMFields(){
+  const cur=getLLM();
+  const p=PROVIDERS.find(q=>q.id===cur.provider) || PROVIDERS[0];
+  const isOllama=p.id==='ollama';
+  const wrap=document.getElementById('llm-fields');
+  wrap.innerHTML=`
+    ${isOllama?'':`
+      <div class="field-row">
+        <label>API key</label>
+        <input id="llm-key" type="password" placeholder="${p.id==='anthropic'?'sk-ant-...':'sk-...'}" value="${cur.key||''}" autocomplete="off">
+        <div class="field-help">${p.keyHelp}</div>
+      </div>`}
+    <div class="field-row">
+      <label>Base URL${isOllama?'':' (advanced)'}</label>
+      <input id="llm-base" type="text" placeholder="${p.defaultBase}" value="${cur.baseUrl||p.defaultBase}" autocomplete="off">
+      <div class="field-help">${isOllama?'Default Ollama runs on localhost:11434. Make sure <code>ollama serve</code> is running.':'Leave default unless you proxy through your own gateway.'}</div>
+    </div>`;
+}
+
+function saveLLM(){
+  const cur=getLLM();
+  const k=document.getElementById('llm-key'); if (k) cur.key=k.value.trim();
+  const b=document.getElementById('llm-base'); if (b) cur.baseUrl=b.value.trim() || (PROVIDERS.find(p=>p.id===cur.provider)?.defaultBase);
+  if (!cur.provider) cur.provider='anthropic';
+  lsSet(LLM_KEY,cur);
+  // Mirror to legacy keys finance.html already uses
+  lsSet('fig_provider', cur.provider);
+  if (cur.key) lsSet('fig_key', cur.key);
+  const t=document.getElementById('llm-toast');t.className='s-toast ok';t.textContent='Saved.';
+  setTimeout(()=>{t.textContent='';},3000);
+}
+
+async function testLLM(){
+  saveLLM(); // ensure latest values are persisted before testing
+  const cur=getLLM();
+  const t=document.getElementById('llm-toast'); t.className='s-toast'; t.textContent='Pinging…';
+  try {
+    if (cur.provider==='ollama') {
+      const r=await fetch((cur.baseUrl||'http://localhost:11434')+'/api/tags');
+      if (!r.ok) throw new Error('HTTP '+r.status);
+      const d=await r.json();
+      t.classList.add('ok'); t.textContent='Ollama up · '+(d.models?.length||0)+' models available.';
+    } else if (cur.provider==='anthropic') {
+      const r=await fetch((cur.baseUrl||'https://api.anthropic.com')+'/v1/messages',{
+        method:'POST',
+        headers:{'x-api-key':cur.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true','Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1,messages:[{role:'user',content:'hi'}]})
+      });
+      if (!r.ok) {const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||('HTTP '+r.status));}
+      t.classList.add('ok'); t.textContent='Anthropic OK.';
+    } else if (cur.provider==='openai') {
+      const r=await fetch((cur.baseUrl||'https://api.openai.com')+'/v1/models',{headers:{'Authorization':'Bearer '+cur.key}});
+      if (!r.ok) {const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||('HTTP '+r.status));}
+      t.classList.add('ok'); t.textContent='OpenAI OK.';
+    } else if (cur.provider==='openrouter') {
+      const r=await fetch((cur.baseUrl||'https://openrouter.ai/api')+'/v1/models',{headers:{'Authorization':'Bearer '+cur.key}});
+      if (!r.ok) throw new Error('HTTP '+r.status);
+      const d=await r.json();
+      t.classList.add('ok'); t.textContent='OpenRouter OK · '+(d.data?.length||'?')+' models.';
+    }
+  } catch(e) {
+    t.classList.add('err'); t.textContent='Failed: '+(e.message||e);
+  }
+}
+
+function clearLLM(){
+  if (!confirm('Disconnect LLM? Your key will be cleared from this device.')) return;
+  lsDel(LLM_KEY); lsDel('fig_provider'); lsDel('fig_key');
+  renderLLM();
+}
+
+// ── Cloud sync ──
+function renderSync(){
+  const s=getSync();
+  document.getElementById('sync-url').value = s.workerUrl||'';
+  document.getElementById('sync-auto').checked = !!s.autoSync;
+  const status=document.getElementById('sync-status');
+  status.innerHTML = s.lastSyncedAt ? `Last synced: ${new Date(s.lastSyncedAt).toLocaleString()}` : 'Not synced yet.';
+}
+
+function persistSyncSettings(){
+  const s=getSync();
+  s.workerUrl = document.getElementById('sync-url').value.trim().replace(/\/$/,'');
+  s.autoSync  = document.getElementById('sync-auto').checked;
+  lsSet(SYNC_KEY,s);
+  return s;
+}
+
+async function syncNow(){
+  const s=persistSyncSettings();
+  const acc=getAccount();
+  const t=document.getElementById('sync-toast'); t.className='s-toast'; t.textContent='';
+  if (!s.workerUrl) {t.classList.add('err');t.textContent='Set Worker URL first.';return;}
+  if (!acc.worker?.token) {t.classList.add('err');t.textContent='Sign in with a handle on the Identity tab first.';return;}
+  t.textContent='Uploading…';
+  try {
+    const payload = collectLocalState();
+    const r=await fetch(s.workerUrl+'/data',{
+      method:'PUT',
+      headers:{'Authorization':'Bearer '+acc.worker.token,'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+    if (!r.ok) {const e=await r.json().catch(()=>({}));throw new Error(e.error||('HTTP '+r.status));}
+    const d=await r.json();
+    s.lastSyncedAt=d.savedAt||new Date().toISOString(); lsSet(SYNC_KEY,s);
+    t.classList.add('ok'); t.textContent='Synced.'; renderSync();
+  } catch(e) {
+    t.classList.add('err'); t.textContent='Failed: '+(e.message||e);
+  }
+}
+
+async function pullCloud(){
+  const s=persistSyncSettings();
+  const acc=getAccount();
+  const t=document.getElementById('sync-toast'); t.className='s-toast'; t.textContent='';
+  if (!s.workerUrl||!acc.worker?.token) {t.classList.add('err');t.textContent='Set Worker URL and sign in first.';return;}
+  if (!confirm('Pull cloud data? This will overwrite your current local data on this device.')) return;
+  t.textContent='Pulling…';
+  try {
+    const r=await fetch(s.workerUrl+'/data',{headers:{'Authorization':'Bearer '+acc.worker.token}});
+    if (!r.ok) throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    if (!d.data) {t.classList.add('err');t.textContent='No cloud data found.';return;}
+    applyLocalState(d.data);
+    t.classList.add('ok'); t.textContent='Pulled. Reloading…';
+    setTimeout(()=>window.location.reload(),800);
+  } catch(e) {
+    t.classList.add('err'); t.textContent='Failed: '+(e.message||e);
+  }
+}
+
+function collectLocalState(){
+  // Snapshot every Fig key from localStorage. IndexedDB (finance) gets handled inside finance.html itself when sync there matures.
+  const out={ts:Date.now(),version:1,localStorage:{}};
+  Object.keys(localStorage).forEach(k=>{
+    if (k.startsWith('fig_') || k==='ht_v4') out.localStorage[k]=localStorage.getItem(k);
+  });
+  return out;
+}
+function applyLocalState(state){
+  if (!state||!state.localStorage) return;
+  Object.entries(state.localStorage).forEach(([k,v])=>{try{localStorage.setItem(k,v);}catch{}});
+}
+
+function exportLocal(){
+  const blob=new Blob([JSON.stringify(collectLocalState(),null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=`fig-export-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  const t=document.getElementById('sync-toast');t.className='s-toast ok';t.textContent='Downloaded.';
+  setTimeout(()=>{t.textContent='';},3000);
+}
+function importLocal(ev){
+  const f=ev.target.files?.[0]; if (!f) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try {
+      const state=JSON.parse(reader.result);
+      if (!confirm('Import will overwrite local Fig data. Continue?')) return;
+      applyLocalState(state);
+      const t=document.getElementById('sync-toast');t.className='s-toast ok';t.textContent='Imported. Reloading…';
+      setTimeout(()=>window.location.reload(),800);
+    } catch(e) {
+      const t=document.getElementById('sync-toast');t.className='s-toast err';t.textContent='Bad file: '+e.message;
+    }
+  };
+  reader.readAsText(f);
+}
+
+// Persist sync settings whenever inputs change
+document.addEventListener('input', e => {
+  if (e.target && (e.target.id==='sync-url' || e.target.id==='sync-auto')) persistSyncSettings();
+});
 
 async function init(){
   const health=getHealthData();
@@ -545,6 +1063,7 @@ async function init(){
   renderHealth(health);
   renderFinance(finance);
   buildWiki(health,finance);
+  renderAuthChip();
 }
 init();
 </script>
