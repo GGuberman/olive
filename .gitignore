@@ -2,3 +2,12 @@ node_modules/
 *.env
 .env.local
 .DS_Store
+
+# tests
+tests/playwright-report/
+tests/test-results/
+tests/.playwright/
+
+# transient dumps (regenerate via /tmp/dump.py if needed)
+fig-code-dump.txt
+
