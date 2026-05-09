@@ -7,7 +7,7 @@
 function injectStyles() {
   var style = document.createElement('style');
   style.textContent = `
-.fig-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;transition:opacity 0.25s;pointer-events:none}
+.fig-overlay{position:fixed;inset:0;background:#0a0a0f;z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;transition:opacity 0.25s;pointer-events:none}
 .fig-overlay.open{opacity:1;pointer-events:auto}
 .fig-launcher{background:var(--surface,#12121a);border:1px solid var(--border,#252535);border-radius:18px;padding:36px 32px 28px;width:480px;max-width:100%;max-height:90vh;overflow-y:auto;position:relative;transform:translateY(8px);transition:transform 0.25s}
 .fig-overlay.open .fig-launcher{transform:translateY(0)}
@@ -151,11 +151,11 @@ function figRenderAccount() {
       <div class="fig-desc" style="background:var(--surface2,#1a1a26);padding:12px 14px;border-radius:8px;margin-bottom:16px">
         To create an account, deploy the Fig Worker and set the Worker URL in <b>Settings → Cloud sync</b>. Then come back here.
       </div>`}
-    <div class="fig-btn-row">
-      <button class="fig-btn ghost" onclick="figDismissLauncher()">Skip — just show me the app</button>
-      <span class="fig-spacer"></span>
-      <button class="fig-btn primary" onclick="nextStep()">Skip this step →</button>
-    </div>`;
+      <div class="fig-btn-row">
+        <button class="fig-btn ghost" onclick="figDismissLauncher()">Skip — just show me the app</button>
+        <span class="fig-spacer"></span>
+        <button class="fig-btn primary" onclick="nextStep()">Next →</button>
+      </div>`;
 }
 
 function figCreateAccount() {
@@ -340,7 +340,7 @@ async function figToggleWid() {
       action: wcfg.worldIdAction || 'verify-human',
       signal: ident.worker.handle,
       verification_level: 'orb',
-    }).then(function () { return idkit.open(); });
+    });
     toast.textContent = 'Verifying with Fig Worker…';
     var r = await fetch(sync.workerUrl.replace(/\/$/, '') + '/auth/worldid/verify', {
       method: 'POST',

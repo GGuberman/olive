@@ -60,6 +60,9 @@
     var provider = llm.provider || 'anthropic';
     var key = llm.key;
     var baseUrl = llm.baseUrl || figGetProvider(provider).defaultBase;
+    if ((provider === 'openai' || provider === 'deepseek') && (!llm.baseUrl || llm.baseUrl === figGetProvider(provider).defaultBase)) {
+      throw new Error(provider + ' does not support browser CORS. Use OpenRouter (supports all models, works from browser), or set a custom proxy Base URL.');
+    }
     if (provider === 'ollama') {
       var r = await fetch((baseUrl || 'http://localhost:11434') + '/api/tags');
       if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -101,6 +104,9 @@
     var key = llm.key;
     var baseUrl = llm.baseUrl || figGetProvider(provider).defaultBase;
     if (!key && provider !== 'ollama') throw new Error('No API key configured. Set one in Settings → LLM.');
+    if ((provider === 'openai' || provider === 'deepseek') && (!llm.baseUrl || llm.baseUrl === figGetProvider(provider).defaultBase)) {
+      throw new Error(provider + ' does not support browser CORS. Use OpenRouter (supports all models, works from browser), or set a custom proxy Base URL in Settings → LLM.');
+    }
     var content = '';
     if (provider === 'anthropic') {
       var r = await fetch((baseUrl || 'https://api.anthropic.com') + '/v1/messages', {

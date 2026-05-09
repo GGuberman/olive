@@ -1381,7 +1381,7 @@ async function connectWorldId(){
       action: cfg.worldIdAction || 'verify-human',
       signal: acc.worker.handle,
       verification_level: 'orb',
-    }).then(()=>idkitGlobal.open());
+    });
     toast.textContent='Verifying with Fig Worker…';
     const r=await fetch(sync.workerUrl.replace(/\/$/,'')+'/auth/worldid/verify',{
       method:'POST',

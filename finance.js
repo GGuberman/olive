@@ -110,45 +110,18 @@ async function dbGetAllKeys(store) {
   });
 }
 
-async function callLLM(systemPrompt, userMessage, expectJSON = false) {
-  const provider = LS.get('fig_provider') || 'anthropic';
-  const key = LS.get('fig_key');
-  if (!key) throw new Error('No API key');
-
-  let content = '';
-  if (provider === 'anthropic') {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true' },
-      body: JSON.stringify({ model:'claude-3-5-haiku-20241022', max_tokens:1024, system:systemPrompt, messages:[{role:'user',content:userMessage}] })
-    });
-    const d = await res.json();
-    if (d.error) throw new Error(d.error.message);
-    content = d.content?.[0]?.text || '';
-  } else if (provider === 'openai' || provider === 'deepseek') {
-    const base = FINANCE_PROVIDERS[provider].baseUrl;
-    const model = provider === 'deepseek' ? 'deepseek-chat' : 'gpt-4o-mini';
-    const res = await fetch(`${base}/chat/completions`, {
-      method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
-      body:JSON.stringify({model,max_tokens:1024,messages:[{role:'system',content:systemPrompt},{role:'user',content:userMessage}]})
-    });
-    const d = await res.json();
-    if (d.error) throw new Error(d.error.message);
-    content = d.choices?.[0]?.message?.content || '';
-  } else if (provider === 'gemini') {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{role:'user',parts:[{text:`${systemPrompt}\n\n${userMessage}`}]}]})
-    });
-    const d = await res.json();
-    if (d.error) throw new Error(d.error.message);
-    content = d.candidates?.[0]?.content?.parts?.[0]?.text || '';
+async function callLLM(systemPrompt, userMessage, expectJSON) {
+  var llm = figGetConfig().llm || {};
+  if (!llm.provider) llm.provider = 'anthropic';
+  if (!llm.key && llm.provider !== 'ollama') {
+    var legacyKey = LS.get('fig_key');
+    if (legacyKey) llm.key = legacyKey;
   }
-  if (expectJSON) {
-    content = content.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
-    return JSON.parse(content);
+  if (!llm.key && llm.provider !== 'ollama') throw new Error('No API key configured. Set one in Settings → LLM.');
+  if (llm.provider === 'openai' || llm.provider === 'deepseek') {
+    throw new Error(llm.provider + ' does not support browser CORS. Use OpenRouter (supports all models, works from browser), or set a custom proxy Base URL in Settings → LLM.');
   }
-  return content;
+  return window.figCallLLM(systemPrompt, userMessage, expectJSON, llm);
 }
 
 const QUESTIONS = [
