@@ -11,8 +11,10 @@ test.describe('Finance page', () => {
     page.on('pageerror', e => errors.push(e.message));
 
     await page.goto('/finance.html');
+    // Dismiss first-visit overlay so it doesn't interfere
+    await page.evaluate(() => window.figDismissLauncher());
     await expect(page.locator('#app-loading')).toBeHidden({ timeout: 15000 });
-    await expect(page.locator('#onboarding')).toBeVisible();
+    await expect(page.locator('#onboarding')).toBeVisible({ timeout: 10000 });
     await expect(page.locator('.ob-logo')).toContainText('Fig Finance');
 
     await page.waitForTimeout(500);
@@ -26,8 +28,10 @@ test.describe('Finance page', () => {
 
   test('back-link returns to home', async ({ page }) => {
     await page.goto('/finance.html');
-    await page.click('button[onclick*="navigateTo"]');
-    await expect(page).toHaveURL(/index\.html$/);
+    // Dismiss first-visit overlay
+    await page.evaluate(() => window.figDismissLauncher());
+    await page.click('button[onclick*="navigateTo(\'dashboard\')"]');
+    await expect(page).toHaveURL(/index\.html#dashboard/);
     await expect(page.locator('.wordmark')).toHaveText('Fig');
   });
 

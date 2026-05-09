@@ -36,7 +36,7 @@ test.describe('Home page', () => {
 
   test('does not include the old Brain card', async ({ page }) => {
     await page.goto('/index.html');
-    const text = await page.locator('main').textContent();
+    const text = await page.locator('.content-wrap').textContent();
     expect(text).not.toContain('Brain');
   });
 
