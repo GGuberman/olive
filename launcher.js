@@ -1,45 +1,7 @@
 (function(){
 'use strict';
 
-var CONFIG_KEY = 'fig_config';
-var LEGACY_ACCOUNT = 'fig_account';
-var LEGACY_LLM = 'fig_llm';
-var LEGACY_PROVIDER = 'fig_provider';
-var LEGACY_KEY = 'fig_key';
-
-function lsGet(k, fallback) {
-  try { var r = localStorage.getItem(k); return r ? JSON.parse(r) : (fallback || null); } catch(e) { return fallback || null; }
-}
-function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
-
-// ── Unified config ────────────────────────────
-function getFigConfig() {
-  var cfg = lsGet(CONFIG_KEY);
-  if (!cfg) cfg = {};
-  // Migrate from legacy keys
-  if (!cfg.launched && lsGet(LEGACY_ACCOUNT)) cfg.identity = lsGet(LEGACY_ACCOUNT);
-  if (!cfg.llm && lsGet(LEGACY_LLM)) cfg.llm = lsGet(LEGACY_LLM);
-  if (!cfg.llm && lsGet(LEGACY_PROVIDER)) cfg.llm = { provider: lsGet(LEGACY_PROVIDER), key: lsGet(LEGACY_KEY) };
-  return cfg;
-}
-function setFigConfig(cfg) {
-  lsSet(CONFIG_KEY, cfg);
-  // Mirror to legacy keys
-  if (cfg.identity) lsSet(LEGACY_ACCOUNT, cfg.identity);
-  if (cfg.llm) {
-    lsSet(LEGACY_LLM, cfg.llm);
-    lsSet(LEGACY_PROVIDER, cfg.llm.provider);
-    if (cfg.llm.key) lsSet(LEGACY_KEY, cfg.llm.key);
-  }
-}
-
-// ── Provider list ──────────────────────────────
-var PROVIDERS = [
-  { id:'anthropic',  name:'Claude',   desc:'Anthropic · direct from browser',       keyPlaceholder:'sk-ant-...',                            defaultBase:'https://api.anthropic.com' },
-  { id:'openrouter', name:'OpenRouter', desc:'~80 models, one key',                 keyPlaceholder:'sk-...',                                defaultBase:'https://openrouter.ai/api' },
-  { id:'openai',     name:'GPT',      desc:'OpenAI · needs proxy (no CORS)',        keyPlaceholder:'sk-...',                                defaultBase:'https://api.openai.com' },
-  { id:'ollama',     name:'Ollama',   desc:'Local · runs on your machine',          keyPlaceholder:'(no key needed)',                       defaultBase:'http://localhost:11434' },
-];
+// fig-shared.js must be loaded first (provides FIG_PROVIDERS, figGetConfig, figSetConfig, etc.)
 
 // ── CSS injection ─────────────────────────────
 function injectStyles() {
@@ -153,10 +115,10 @@ function prevStep() {
 
 // ── Account step ──────────────────────────────
 function figRenderAccount() {
-  var cfg = getFigConfig();
+  var cfg = figGetConfig();
   var ident = cfg.identity || {};
   var workerConnected = ident.worker && ident.worker.handle && ident.worker.token;
-  var sync = lsGet('fig_sync');
+  var sync = figGetSync();
   var hasWorkerUrl = sync && sync.workerUrl;
 
   if (workerConnected) {
@@ -205,7 +167,7 @@ function figCreateAccount() {
     alert('Invalid handle. Use letters, numbers, _ and - (2-32 chars).');
     return;
   }
-  var sync = lsGet('fig_sync');
+  var sync = figGetSync();
   var workerUrl = sync && sync.workerUrl;
   if (!workerUrl) { alert('Worker URL not configured. Set it in Settings → Cloud sync first.'); return; }
   var toast = document.getElementById('fig-acc-toast');
@@ -221,10 +183,10 @@ function figCreateAccount() {
       if (res.status === 409) { alert('Handle taken. Try another.'); if (btn) btn.disabled = false; return; }
       throw new Error(res.data.error || ('HTTP ' + res.status));
     }
-    var cfg = getFigConfig();
+    var cfg = figGetConfig();
     if (!cfg.identity) cfg.identity = {};
     cfg.identity.worker = { handle: res.data.username, token: res.data.token, createdAt: new Date().toISOString() };
-    setFigConfig(cfg);
+    figSetConfig(cfg);
     if (toast) { toast.className = 'fig-toast ok'; toast.textContent = '✓ Created @' + res.data.username; }
     setTimeout(function() { render(); }, 600);
   }).catch(function(e) {
@@ -235,7 +197,7 @@ function figCreateAccount() {
 
 // ── Identity step ─────────────────────────────
 function figRenderIdentity() {
-  var cfg = getFigConfig();
+  var cfg = figGetConfig();
   var ident = cfg.identity || {};
   var widConnected = ident.worldid && ident.worldid.nullifier_hash;
   var bskyConnected = ident.bsky && ident.bsky.handle && ident.bsky.accessJwt;
@@ -273,14 +235,14 @@ function figRenderIdentity() {
 }
 
 function figToggleWorker() {
-  var cfg = getFigConfig();
+  var cfg = figGetConfig();
   if (cfg.identity && cfg.identity.worker && cfg.identity.worker.handle) {
     return; // already connected
   }
   var handle = prompt('Choose a handle (2-32 chars, letters/numbers/_-):');
   if (!handle) return;
   if (!/^[a-zA-Z0-9_-]{2,32}$/.test(handle)) { alert('Invalid handle. Use letters, numbers, _ and - (2-32 chars).'); return; }
-  var sync = lsGet('fig_sync');
+  var sync = figGetSync();
   var workerUrl = sync && sync.workerUrl;
   if (!workerUrl) {
     alert('Set a Worker URL in Settings → Cloud sync first, then come back to create a handle.');
@@ -297,10 +259,10 @@ function figToggleWorker() {
       if (res.status === 409) { alert('Handle taken. Try another or paste your existing token.'); return; }
       throw new Error(res.data.error || ('HTTP ' + res.status));
     }
-    var cfg2 = getFigConfig();
+    var cfg2 = figGetConfig();
     if (!cfg2.identity) cfg2.identity = {};
     cfg2.identity.worker = { handle: res.data.username, token: res.data.token, createdAt: new Date().toISOString() };
-    setFigConfig(cfg2);
+    figSetConfig(cfg2);
     if (toast) { toast.className = 'fig-toast ok'; toast.textContent = '✓ Connected as @' + res.data.username; }
     render();
   }).catch(function(e) {
@@ -310,14 +272,14 @@ function figToggleWorker() {
 
 function figDisconnectWorker() {
   if (!confirm('Disconnect Fig Handle?')) return;
-  var cfg = getFigConfig();
+  var cfg = figGetConfig();
   if (cfg.identity) delete cfg.identity.worker;
-  setFigConfig(cfg);
+  figSetConfig(cfg);
   render();
 }
 
 function figToggleBsky() {
-  var cfg = getFigConfig();
+  var cfg = figGetConfig();
   if (cfg.identity && cfg.identity.bsky && cfg.identity.bsky.handle) return;
   var handle = prompt('Your Bluesky handle (e.g. alice.bsky.social):');
   if (!handle) return;
@@ -331,10 +293,10 @@ function figToggleBsky() {
   }).then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
   .then(function(res) {
     if (!res.ok) throw new Error(res.data.message || res.data.error || 'Auth failed');
-    var cfg2 = getFigConfig();
+    var cfg2 = figGetConfig();
     if (!cfg2.identity) cfg2.identity = {};
     cfg2.identity.bsky = { did: res.data.did, handle: res.data.handle, accessJwt: res.data.accessJwt, refreshJwt: res.data.refreshJwt, createdAt: new Date().toISOString() };
-    setFigConfig(cfg2);
+    figSetConfig(cfg2);
     if (toast) { toast.className = 'fig-toast ok'; toast.textContent = '✓ Connected as @' + res.data.handle; }
     render();
   }).catch(function(e) {
@@ -344,30 +306,69 @@ function figToggleBsky() {
 
 function figDisconnectBsky() {
   if (!confirm('Disconnect Bluesky?')) return;
-  var cfg = getFigConfig();
+  var cfg = figGetConfig();
   if (cfg.identity) delete cfg.identity.bsky;
-  setFigConfig(cfg);
+  figSetConfig(cfg);
   render();
 }
 
-function figToggleWid() {
-  var cfg = getFigConfig();
+async function figToggleWid() {
+  var cfg = figGetConfig();
   if (cfg.identity && cfg.identity.worldid && cfg.identity.worldid.nullifier_hash) return;
   var toast = document.getElementById('fig-ident-toast');
-  if (toast) toast.textContent = 'World ID needs a Fig handle + Worker URL. Set those up in Settings, then try again.';
+  if (!toast) return;
+  var ident = cfg.identity || {};
+  var sync = figGetSync();
+  if (!ident.worker || !ident.worker.token) { toast.className = 'fig-toast err'; toast.textContent = 'Create a handle first (Account step).'; return; }
+  if (!sync.workerUrl) { toast.className = 'fig-toast err'; toast.textContent = 'Set Worker URL in Cloud sync settings first.'; return; }
+  toast.className = 'fig-toast';
+  toast.textContent = 'Loading config…';
+  try {
+    var cfgResp = await fetch(sync.workerUrl.replace(/\/$/, '') + '/config');
+    if (!cfgResp.ok) throw new Error('Cannot reach Worker');
+    var wcfg = await cfgResp.json();
+    if (!wcfg.worldIdAppId) { toast.className = 'fig-toast err'; toast.textContent = 'Worker missing WORLD_ID_APP_ID. See SPEC-WORLDID.md.'; return; }
+    var idkit = window.IDKit || window.IDKitInternal;
+    if (!idkit) { toast.className = 'fig-toast err'; toast.textContent = 'IDKit not loaded. Refresh and try again.'; return; }
+    toast.textContent = 'Open World App on your phone to scan the QR…';
+    var result = await idkit.init({
+      app_id: wcfg.worldIdAppId,
+      action: wcfg.worldIdAction || 'verify-human',
+      signal: ident.worker.handle,
+      verification_level: 'orb',
+    }).then(function () { return idkit.open(); });
+    toast.textContent = 'Verifying with Fig Worker…';
+    var r = await fetch(sync.workerUrl.replace(/\/$/, '') + '/auth/worldid/verify', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + ident.worker.token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ proof: result, action: wcfg.worldIdAction || 'verify-human', signal: ident.worker.handle })
+    });
+    var d = await r.json();
+    if (!r.ok) throw new Error(d.error || ('HTTP ' + r.status));
+    var cfg2 = figGetConfig();
+    if (!cfg2.identity) cfg2.identity = {};
+    cfg2.identity.worldid = { nullifier_hash: d.nullifier_hash, verification_level: d.verification_level, verifiedAt: new Date().toISOString() };
+    figSetConfig(cfg2);
+    toast.className = 'fig-toast ok';
+    toast.textContent = 'Verified.';
+    render();
+  } catch (e) {
+    toast.className = 'fig-toast err';
+    toast.textContent = 'Failed: ' + (e.message || e);
+  }
 }
 
 function figDisconnectWid() {
   if (!confirm('Disconnect World ID?')) return;
-  var cfg = getFigConfig();
+  var cfg = figGetConfig();
   if (cfg.identity) delete cfg.identity.worldid;
-  setFigConfig(cfg);
+  figSetConfig(cfg);
   render();
 }
 
 // ── LLM step ──────────────────────────────────
 function figRenderLLM() {
-  var cfg = getFigConfig();
+  var cfg = figGetConfig();
   var llm = cfg.llm || {};
   var connected = llm && llm.provider && llm.key;
   return `
@@ -375,7 +376,7 @@ function figRenderLLM() {
     <div class="fig-desc">Fig uses <b>your</b> key — never ours. Stored locally in your browser, never sent to any server.<br>
     Pick a provider and paste your API key.</div>
     <div class="fig-grid" id="fig-provider-grid">
-      ${PROVIDERS.map(function(p) {
+      ${FIG_PROVIDERS.map(function(p) {
         var active = (llm.provider === p.id) ? ' selected' : '';
         return '<div class="fig-card' + active + '" onclick="figPickProvider(\'' + p.id + '\')">' +
           '<div class="fig-card-name">' + p.name + '</div>' +
@@ -396,9 +397,9 @@ function figRenderLLM() {
 }
 
 function figLLMFields() {
-  var cfg = getFigConfig();
+  var cfg = figGetConfig();
   var llm = cfg.llm || {};
-  var p = PROVIDERS.find(function(q) { return q.id === llm.provider; }) || PROVIDERS[0];
+  var p = FIG_PROVIDERS.find(function(q) { return q.id === llm.provider; }) || FIG_PROVIDERS[0];
   var isOllama = p.id === 'ollama';
   return '<div class="fig-field">' +
     (!isOllama ? '<label>API key</label><input id="fig-llm-key" type="password" placeholder="' + p.keyPlaceholder + '" value="' + (llm.key || '') + '" autocomplete="off"><div class="fig-field-help"><a href="' + (p.id === 'anthropic' ? 'https://console.anthropic.com/settings/keys' : p.id === 'openrouter' ? 'https://openrouter.ai/keys' : p.id === 'openai' ? 'https://platform.openai.com/api-keys' : '') + '" target="_blank">Get a key →</a></div>' : '') +
@@ -412,72 +413,55 @@ function figLLMFields() {
 }
 
 function figPickProvider(id) {
-  var cfg = getFigConfig();
+  var cfg = figGetConfig();
   if (!cfg.llm) cfg.llm = {};
   cfg.llm.provider = id;
-  var p = PROVIDERS.find(function(q) { return q.id === id; });
-  if (p && (!cfg.llm.baseUrl || PROVIDERS.some(function(q) { return q.defaultBase === cfg.llm.baseUrl; }))) {
+  var p = FIG_PROVIDERS.find(function(q) { return q.id === id; });
+  if (p && (!cfg.llm.baseUrl || FIG_PROVIDERS.some(function(q) { return q.defaultBase === cfg.llm.baseUrl; }))) {
     cfg.llm.baseUrl = p.defaultBase;
   }
-  setFigConfig(cfg);
+  figSetConfig(cfg);
   render();
 }
 
 function figSaveLLM() {
-  var cfg = getFigConfig();
+  var cfg = figGetConfig();
   if (!cfg.llm) cfg.llm = {};
   var k = document.getElementById('fig-llm-key');
   var b = document.getElementById('fig-llm-base');
   if (k) cfg.llm.key = k.value.trim();
-  if (b) cfg.llm.baseUrl = b.value.trim() || (PROVIDERS.find(function(p) { return p.id === cfg.llm.provider; }) || {}).defaultBase;
+  if (b) cfg.llm.baseUrl = b.value.trim() || (FIG_PROVIDERS.find(function(p) { return p.id === cfg.llm.provider; }) || {}).defaultBase;
   if (!cfg.llm.provider) cfg.llm.provider = 'anthropic';
-  setFigConfig(cfg);
+  figSetConfig(cfg);
   var toast = document.getElementById('fig-llm-toast');
   if (toast) { toast.className = 'fig-toast ok'; toast.textContent = 'Saved.'; }
 }
 
-function figTestLLM() {
+async function figTestLLM() {
   figSaveLLM();
-  var cfg = getFigConfig();
+  var cfg = figGetConfig();
   var llm = cfg.llm || {};
   var toast = document.getElementById('fig-llm-toast');
   if (!toast) return;
   toast.className = 'fig-toast';
   toast.textContent = 'Pinging…';
-  var provider = llm.provider || 'anthropic';
-  var key = llm.key;
-  var baseUrl = llm.baseUrl || 'https://api.anthropic.com';
-  if (provider === 'ollama') {
-    fetch((baseUrl || 'http://localhost:11434') + '/api/tags')
-      .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(function(d) { toast.className = 'fig-toast ok'; toast.textContent = 'Ollama up · ' + (d.models ? d.models.length : 0) + ' models.'; })
-      .catch(function(e) { toast.className = 'fig-toast err'; toast.textContent = 'Failed: ' + (e.message || e); });
-  } else if (provider === 'anthropic') {
-    fetch((baseUrl || 'https://api.anthropic.com') + '/v1/messages', {
-      method: 'POST',
-      headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 1, messages: [{ role: 'user', content: 'hi' }] })
-    }).then(function(r) { if (!r.ok) return r.json().then(function(e) { throw new Error((e.error && e.error.message) || 'HTTP ' + r.status); }); toast.className = 'fig-toast ok'; toast.textContent = 'Anthropic OK.'; })
-    .catch(function(e) { toast.className = 'fig-toast err'; toast.textContent = 'Failed: ' + (e.message || e); });
-  } else if (provider === 'openai') {
-    fetch((baseUrl || 'https://api.openai.com') + '/v1/models', { headers: { 'Authorization': 'Bearer ' + key } })
-      .then(function(r) { if (!r.ok) return r.json().then(function(e) { throw new Error((e.error && e.error.message) || 'HTTP ' + r.status); }); toast.className = 'fig-toast ok'; toast.textContent = 'OpenAI OK.'; })
-      .catch(function(e) { toast.className = 'fig-toast err'; toast.textContent = 'Failed: ' + (e.message || e); });
-  } else if (provider === 'openrouter') {
-    fetch((baseUrl || 'https://openrouter.ai/api') + '/v1/models', { headers: { 'Authorization': 'Bearer ' + key } })
-      .then(function(r) { if (!r.ok) return r.json().then(function(e) { throw new Error((e.error && e.error.message) || 'HTTP ' + r.status); }); return r.json(); })
-      .then(function(d) { toast.className = 'fig-toast ok'; toast.textContent = 'OpenRouter OK · ' + (d.data ? d.data.length : '?') + ' models.'; })
-      .catch(function(e) { toast.className = 'fig-toast err'; toast.textContent = 'Failed: ' + (e.message || e); });
+  try {
+    var msg = await window.figTestLLM(llm);
+    toast.className = 'fig-toast ok';
+    toast.textContent = msg;
+  } catch (e) {
+    toast.className = 'fig-toast err';
+    toast.textContent = 'Failed: ' + (e.message || e);
   }
 }
 
 // ── Done step ─────────────────────────────────
 function figRenderDone() {
-  var cfg = getFigConfig();
+  var cfg = figGetConfig();
   var ident = cfg.identity || {};
   var llm = cfg.llm || {};
   var wid = ident.worldid && ident.worldid.nullifier_hash ? '✓ World ID verified' : '○ skipped';
-  var llmStatus = llm.provider && llm.key ? '✓ ' + (PROVIDERS.find(function(p) { return p.id === llm.provider; }) || {}).name + ' connected' : '○ skipped';
+  var llmStatus = llm.provider && llm.key ? '✓ ' + (FIG_PROVIDERS.find(function(p) { return p.id === llm.provider; }) || {}).name + ' connected' : '○ skipped';
 
   return `
     <div class="fig-h2">You're set</div>
@@ -519,9 +503,9 @@ function closeFigLauncher() {
 }
 
 function figDismissLauncher() {
-  var cfg = getFigConfig();
+  var cfg = figGetConfig();
   cfg.launched = true;
-  setFigConfig(cfg);
+  figSetConfig(cfg);
   closeFigLauncher();
   updateSentry();
 }
@@ -557,7 +541,7 @@ function injectSentry() {
 }
 
 function updateSentry() {
-  var cfg = getFigConfig();
+  var cfg = figGetConfig();
   var ident = cfg.identity || {};
   var llm = cfg.llm || {};
   var sentry = document.getElementById('fig-sentry');
@@ -575,7 +559,7 @@ function updateSentry() {
 // ── First launch check ────────────────────────
 function checkFigLauncher() {
   injectStyles();
-  var cfg = getFigConfig();
+  var cfg = figGetConfig();
   if (!cfg.launched) {
     showFigLauncher();
   }
@@ -595,8 +579,8 @@ function checkFigLauncher() {
   window.figTestLLM = figTestLLM;
   window.nextStep = nextStep;
   window.prevStep = prevStep;
-  window.getFigConfig = getFigConfig;
-  window.setFigConfig = setFigConfig;
+  window.figGetConfig = figGetConfig;
+  window.setFigConfig = figSetConfig;
   window.updateSentry = updateSentry;
   window.navigateTo = window.navigateTo || function(v) { window.location.hash = v; };
 }

@@ -7,6 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@worldcoin/idkit-standalone@1.4.2/build/index.global.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+<script src="fig-shared.js"></script>
 <script src="launcher.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Fraunces:opsz,wght,SOFT@9..144,300..600,30..100&display=swap');
@@ -1075,7 +1076,7 @@ function buildWiki(health, finance){
   }
 }
 
-function sendWiki(){
+async function sendWiki(){
   const ta=document.getElementById('wiki-text');
   const toast=document.getElementById('wiki-toast');
   const text=ta.value.trim();
@@ -1085,9 +1086,63 @@ function sendWiki(){
     inbox.push({ts:Date.now(),text});
     localStorage.setItem('fig_wiki_inbox',JSON.stringify(inbox));
   }catch{}
-  ta.value='';
-  toast.style.color='var(--green)';
-  toast.textContent='Saved to your wiki inbox. Routing to Health/Finance is coming with the LLM hook-up.';
+  const llm=figGetConfig().llm||{};
+  if(llm.provider&&llm.key){
+    toast.textContent='Fig is analyzing…';toast.style.color='var(--accent2)';
+    try{
+      const health=getHealthData();
+      const habits=health?.config?.habits||[];
+      const today=new Date().toISOString().slice(0,10);
+      const result=await figCallLLM(
+        `You are Fig, a personal wiki assistant. Parse the user's daily update into structured data.
+Return ONLY valid JSON:
+{"health": {"weight":number|null,"calories":number|null,"protein":number|null,"steps":number|null,"water":number|null,"mood":"good"|"ok"|"rough"|null,"notes":string|null,"habits":{"habit name":true}|null}|null,
+"finance":{"category":string,"amount":number}|null,
+"summary":"brief summary of what was logged"}
+Available health habits: ${JSON.stringify(habits)}`,text,true);
+      let savedHealth=false,savedFinance=false;
+      if(result.health){
+        let data=health||{config:{habits:[]},entries:[],habits:{},moods:{},water:{}};
+        if(!data.entries)data.entries=[];
+        if(!data.habits)data.habits={};
+        if(!data.moods)data.moods={};
+        if(!data.water)data.water={};
+        const h=result.health;
+        const entry={date:today,weight:h.weight||null,calories:h.calories||null,protein:h.protein||null,steps:h.steps||null,notes:h.notes||''};
+        const idx=data.entries.findIndex(e=>e.date===today);
+        if(idx>=0)Object.assign(data.entries[idx],entry);
+        else{data.entries.push(entry);data.entries.sort((a,b)=>a.date.localeCompare(b.date));}
+        if(h.habits)data.habits[today]=Object.assign(data.habits[today]||{},h.habits);
+        if(h.mood)data.moods[today]=h.mood;
+        if(h.water!=null)data.water[today]=h.water;
+        try{localStorage.setItem('ht_v4',JSON.stringify(data));}catch{}
+        savedHealth=true;
+      }
+      if(result.finance&&result.finance.category&&result.finance.amount){
+        try{
+          const pending=JSON.parse(localStorage.getItem('fig_wiki_finance')||'[]');
+          pending.push({ts:Date.now(),date:today,category:result.finance.category,amount:result.finance.amount});
+          localStorage.setItem('fig_wiki_finance',JSON.stringify(pending));
+        }catch{}
+        savedFinance=true;
+      }
+      ta.value='';
+      const routed=(savedHealth?'Health':'')+(savedHealth&&savedFinance?' + ':'')+(savedFinance?'Finance':'');
+      toast.textContent='✓ '+(result.summary||'Saved')+(routed?' → '+routed:'');
+      toast.style.color='var(--green)';
+      const h2=getHealthData();
+      const f2=await getFinanceData();
+      renderHealth(h2);renderFinance(f2);buildWiki(h2,f2);
+    }catch(e){
+      ta.value='';
+      toast.textContent='Saved to inbox (LLM: '+(e.message||e)+')';
+      toast.style.color='var(--warn)';
+    }
+  }else{
+    ta.value='';
+    toast.textContent='Saved to your wiki inbox. Connect an LLM key in Settings → LLM for auto-routing.';
+    toast.style.color='var(--green)';
+  }
   setTimeout(()=>{toast.textContent='';},5000);
   scheduleAutoSync();
 }
@@ -1117,20 +1172,15 @@ const ACCOUNT_KEY = 'fig_account';
 const LLM_KEY     = 'fig_llm';
 const SYNC_KEY    = 'fig_sync';
 
-const PROVIDERS = [
-  {id:'anthropic',  name:'Claude',   desc:'Anthropic · direct from browser',       keyHelp:'<a href="https://console.anthropic.com/settings/keys" target="_blank">Get a key →</a>',                       defaultBase:'https://api.anthropic.com'},
-  {id:'openrouter', name:'OpenRouter',desc:'~80 models, one key (browser-friendly)',keyHelp:'<a href="https://openrouter.ai/keys" target="_blank">Get a key →</a>',                                       defaultBase:'https://openrouter.ai/api'},
-  {id:'openai',     name:'GPT',      desc:'OpenAI · needs proxy (no browser CORS)',keyHelp:'OpenAI blocks direct browser calls. Set Base URL to your own proxy/gateway. <a href="https://platform.openai.com/api-keys" target="_blank">Get a key →</a>',                            defaultBase:'https://api.openai.com'},
-  {id:'ollama',     name:'Ollama',   desc:'Local · runs on your machine',         keyHelp:'<a href="https://ollama.com/download" target="_blank">Install Ollama →</a> then run <code>OLLAMA_ORIGINS="*" ollama serve</code> so the browser can reach it.', defaultBase:'http://localhost:11434'},
-];
+const PROVIDERS = window.FIG_PROVIDERS;
 
 function lsGet(k,fallback){try{const r=localStorage.getItem(k);return r?JSON.parse(r):(fallback||null);}catch{return fallback||null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
 function lsDel(k){try{localStorage.removeItem(k);}catch{}}
 
-function getAccount(){return lsGet(ACCOUNT_KEY)||{};}
-function getLLM(){return lsGet(LLM_KEY)||{};}
-function getSync(){return lsGet(SYNC_KEY)||{};}
+function getAccount(){var c=figGetConfig();return c.identity||{};}
+function getLLM(){var c=figGetConfig();return c.llm||{};}
+function getSync(){return figGetSync();}
 
 function openSettings(){
   document.getElementById('settings-modal').classList.add('open');
@@ -1205,7 +1255,7 @@ async function connectWorker(){
       throw new Error(d.error||('HTTP '+r.status));
     }
     const acc=getAccount(); acc.worker={handle:d.username,token:d.token,createdAt:new Date().toISOString()};
-    lsSet(ACCOUNT_KEY,acc);
+    const cfg=figGetConfig(); cfg.identity=acc; figSetConfig(cfg);
     toast.textContent='Connected.'; toast.classList.add('ok');
     renderIdentity();
   } catch(e) {
@@ -1219,7 +1269,7 @@ function pasteWorkerToken(){
   if (!token) return;
   if (!handle) {alert('Type your handle in the Handle field first, then click again.');return;}
   const acc=getAccount(); acc.worker={handle,token,createdAt:new Date().toISOString()};
-  lsSet(ACCOUNT_KEY,acc); renderIdentity();
+  const cfg=figGetConfig(); cfg.identity=acc; figSetConfig(cfg); renderIdentity();
 }
 
 function copyWorkerToken(){
@@ -1233,7 +1283,7 @@ function copyWorkerToken(){
 
 function disconnectWorker(){
   if (!confirm('Disconnect from the Worker? Your token will be cleared from this device. Cloud data is untouched.')) return;
-  const acc=getAccount(); delete acc.worker; lsSet(ACCOUNT_KEY,acc); renderIdentity();
+  const acc=getAccount(); delete acc.worker; const cfg=figGetConfig(); cfg.identity=acc; figSetConfig(cfg); renderIdentity();
 }
 
 async function connectBluesky(){
@@ -1252,7 +1302,7 @@ async function connectBluesky(){
     if (!r.ok) throw new Error(d.message||d.error||('HTTP '+r.status));
     const acc=getAccount();
     acc.bsky={did:d.did,handle:d.handle,accessJwt:d.accessJwt,refreshJwt:d.refreshJwt,createdAt:new Date().toISOString()};
-    lsSet(ACCOUNT_KEY,acc);
+    const cfg=figGetConfig(); cfg.identity=acc; figSetConfig(cfg);
     document.getElementById('bsky-pass').value='';
     toast.textContent='Connected as @'+d.handle+'.'; toast.classList.add('ok');
     renderIdentity();
@@ -1263,7 +1313,7 @@ async function connectBluesky(){
 
 function disconnectBluesky(){
   if (!confirm('Disconnect Bluesky? Tokens will be cleared from this device.')) return;
-  const acc=getAccount(); delete acc.bsky; lsSet(ACCOUNT_KEY,acc); renderIdentity();
+  const acc=getAccount(); delete acc.bsky; const cfg=figGetConfig(); cfg.identity=acc; figSetConfig(cfg); renderIdentity();
 }
 
 let _figWorldConfig = null;
@@ -1317,7 +1367,7 @@ async function connectWorldId(){
     if (!r.ok) throw new Error(d.error||('HTTP '+r.status));
     const acc2=getAccount();
     acc2.worldid={nullifier_hash:d.nullifier_hash, verification_level:d.verification_level, verifiedAt:new Date().toISOString()};
-    lsSet(ACCOUNT_KEY,acc2);
+    const cfg=figGetConfig(); cfg.identity=acc2; figSetConfig(cfg);
     toast.classList.add('ok'); toast.textContent='Verified.';
     renderIdentity();
   } catch(e) {
@@ -1328,7 +1378,7 @@ async function connectWorldId(){
 
 function disconnectWorldId(){
   if (!confirm('Disconnect World ID from this device? Your verification on the Worker is unchanged.')) return;
-  const acc=getAccount(); delete acc.worldid; lsSet(ACCOUNT_KEY,acc); renderIdentity();
+  const acc=getAccount(); delete acc.worldid; const cfg=figGetConfig(); cfg.identity=acc; figSetConfig(cfg); renderIdentity();
 }
 
 function copyAttestationsLink(){
@@ -1405,15 +1455,15 @@ function renderLLM(){
 
 function pickProvider(id){
   const cur=getLLM(); cur.provider=id;
-  const p=PROVIDERS.find(p=>p.id===id);
-  if (p && (!cur.baseUrl || PROVIDERS.some(q=>q.defaultBase===cur.baseUrl))) cur.baseUrl=p.defaultBase;
-  lsSet(LLM_KEY,cur);
+  const p=figGetProvider(id);
+  if (p && (!cur.baseUrl || FIG_PROVIDERS.some(q=>q.defaultBase===cur.baseUrl))) cur.baseUrl=p.defaultBase;
+  const cfg=figGetConfig(); cfg.llm=cur; figSetConfig(cfg);
   renderLLM();
 }
 
 function renderLLMFields(){
   const cur=getLLM();
-  const p=PROVIDERS.find(q=>q.id===cur.provider) || PROVIDERS[0];
+  const p=figGetProvider(cur.provider);
   const isOllama=p.id==='ollama';
   const wrap=document.getElementById('llm-fields');
   wrap.innerHTML=`
@@ -1433,11 +1483,9 @@ function renderLLMFields(){
 function saveLLM(){
   const cur=getLLM();
   const k=document.getElementById('llm-key'); if (k) cur.key=k.value.trim();
-  const b=document.getElementById('llm-base'); if (b) cur.baseUrl=b.value.trim() || (PROVIDERS.find(p=>p.id===cur.provider)?.defaultBase);
+  const b=document.getElementById('llm-base'); if (b) cur.baseUrl=b.value.trim() || (figGetProvider(cur.provider)?.defaultBase);
   if (!cur.provider) cur.provider='anthropic';
-  lsSet(LLM_KEY,cur);
-  lsSet('fig_provider', cur.provider);
-  if (cur.key) lsSet('fig_key', cur.key);
+  const cfg=figGetConfig(); cfg.llm=cur; figSetConfig(cfg);
   const t=document.getElementById('llm-toast');t.className='s-toast ok';t.textContent='Saved.';
   setTimeout(()=>{t.textContent='';},3000);
 }
@@ -1447,29 +1495,8 @@ async function testLLM(){
   const cur=getLLM();
   const t=document.getElementById('llm-toast'); t.className='s-toast'; t.textContent='Pinging…';
   try {
-    if (cur.provider==='ollama') {
-      const r=await fetch((cur.baseUrl||'http://localhost:11434')+'/api/tags');
-      if (!r.ok) throw new Error('HTTP '+r.status);
-      const d=await r.json();
-      t.classList.add('ok'); t.textContent='Ollama up · '+(d.models?.length||0)+' models available.';
-    } else if (cur.provider==='anthropic') {
-      const r=await fetch((cur.baseUrl||'https://api.anthropic.com')+'/v1/messages',{
-        method:'POST',
-        headers:{'x-api-key':cur.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true','Content-Type':'application/json'},
-        body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1,messages:[{role:'user',content:'hi'}]})
-      });
-      if (!r.ok) {const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||('HTTP '+r.status));}
-      t.classList.add('ok'); t.textContent='Anthropic OK.';
-    } else if (cur.provider==='openai') {
-      const r=await fetch((cur.baseUrl||'https://api.openai.com')+'/v1/models',{headers:{'Authorization':'Bearer '+cur.key}});
-      if (!r.ok) {const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||('HTTP '+r.status));}
-      t.classList.add('ok'); t.textContent='OpenAI OK.';
-    } else if (cur.provider==='openrouter') {
-      const r=await fetch((cur.baseUrl||'https://openrouter.ai/api')+'/v1/models',{headers:{'Authorization':'Bearer '+cur.key}});
-      if (!r.ok) throw new Error('HTTP '+r.status);
-      const d=await r.json();
-      t.classList.add('ok'); t.textContent='OpenRouter OK · '+(d.data?.length||'?')+' models.';
-    }
+    const msg = await figTestLLM(cur);
+    t.classList.add('ok'); t.textContent=msg;
   } catch(e) {
     t.classList.add('err'); t.textContent='Failed: '+(e.message||e);
   }
@@ -1477,7 +1504,7 @@ async function testLLM(){
 
 function clearLLM(){
   if (!confirm('Disconnect LLM? Your key will be cleared from this device.')) return;
-  lsDel(LLM_KEY); lsDel('fig_provider'); lsDel('fig_key');
+  figClearLLM();
   renderLLM();
 }
 
@@ -1541,7 +1568,7 @@ async function pullCloud(){
 }
 
 function collectLocalState(){
-  const out={ts:Date.now(),version:1,localStorage:{}};
+  const out={ts:Date.now(),version:2,localStorage:{}};
   Object.keys(localStorage).forEach(k=>{
     if (k.startsWith('fig_') || k==='ht_v4') out.localStorage[k]=localStorage.getItem(k);
   });

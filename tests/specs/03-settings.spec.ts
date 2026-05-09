@@ -18,14 +18,16 @@ test.describe('Settings modal', () => {
     await expect(page.locator('#sec-wid')).toBeVisible();
   });
 
-  test('switches to LLM tab and lists 4 providers', async ({ page }) => {
+  test('switches to LLM tab and lists all providers', async ({ page }) => {
     await page.click('.settings-tab[data-tab="llm"]');
     await expect(page.locator('#pane-llm')).toHaveClass(/active/);
-    await expect(page.locator('.provider-pick')).toHaveCount(4);
+    await expect(page.locator('.provider-pick')).toHaveCount(6);
     await expect(page.locator('.provider-pick:has-text("Claude")')).toBeVisible();
     await expect(page.locator('.provider-pick:has-text("OpenRouter")')).toBeVisible();
     await expect(page.locator('.provider-pick:has-text("GPT")')).toBeVisible();
     await expect(page.locator('.provider-pick:has-text("Ollama")')).toBeVisible();
+    await expect(page.locator('.provider-pick:has-text("Gemini")')).toBeVisible();
+    await expect(page.locator('.provider-pick:has-text("DeepSeek")')).toBeVisible();
   });
 
   test('Ollama hides the API key field', async ({ page }) => {
