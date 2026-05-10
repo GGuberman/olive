@@ -9,20 +9,20 @@ test.describe('Wiki input', () => {
   });
 
   test('saves an entry to the inbox', async ({ page }) => {
-    await page.fill('#wiki-text', 'Slept 8 hours, ran 5k, ate well');
-    await page.click('text=Save note');
+    await page.fill('#wiki-text', 'Just a general test note');
+    await page.click('#wiki-send');
     await expect(page.locator('#wiki-toast')).toContainText('Note saved');
 
     const inbox = await page.evaluate(() =>
       JSON.parse(localStorage.getItem('fig_wiki_inbox') || '[]')
     );
     expect(inbox.length).toBe(1);
-    expect(inbox[0].text).toBe('Slept 8 hours, ran 5k, ate well');
+    expect(inbox[0].text).toBe('Just a general test note');
     expect(typeof inbox[0].ts).toBe('number');
   });
 
   test('rejects empty input', async ({ page }) => {
-    await page.click('text=Save note');
+    await page.click('#wiki-send');
     await expect(page.locator('#wiki-toast')).toContainText('Type something');
     const inbox = await page.evaluate(() =>
       JSON.parse(localStorage.getItem('fig_wiki_inbox') || '[]')
@@ -31,20 +31,20 @@ test.describe('Wiki input', () => {
   });
 
   test('appends multiple entries', async ({ page }) => {
-    for (const t of ['ran 5k', 'cooked dinner', 'paid rent']) {
+    for (const t of ['chores done', 'cooked dinner', 'read a book']) {
       await page.fill('#wiki-text', t);
-      await page.click('text=Save note');
+      await page.click('#wiki-send');
       await page.waitForTimeout(50);
     }
     const inbox = await page.evaluate(() =>
       JSON.parse(localStorage.getItem('fig_wiki_inbox') || '[]')
     );
-    expect(inbox.map((e: any) => e.text)).toEqual(['ran 5k', 'cooked dinner', 'paid rent']);
+    expect(inbox.map((e: any) => e.text)).toEqual(['chores done', 'cooked dinner', 'read a book']);
   });
 
   test('clears the textarea after submit', async ({ page }) => {
     await page.fill('#wiki-text', 'something');
-    await page.click('text=Save note');
+    await page.click('#wiki-send');
     await expect(page.locator('#wiki-text')).toHaveValue('');
   });
 });
