@@ -58,12 +58,7 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(0.5);cursor:po
 .wiki-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:18px;flex-wrap:wrap}
 .wiki-title{font-family:'Fraunces',serif;font-size:1.55rem;color:var(--text);line-height:1.25}
 .wiki-sub{font-size:0.7rem;color:var(--muted);line-height:1.7;margin-top:6px;max-width:540px}
-.wiki-meta{display:flex;gap:18px;font-size:0.62rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase}
-.wiki-meta b{color:var(--accent2);font-weight:500;letter-spacing:0;text-transform:none;font-family:'Fraunces',serif;font-size:0.95rem;display:block;margin-bottom:2px}
-.wiki-body{display:grid;grid-template-columns:1.4fr 1fr;gap:24px;margin-top:8px}
 .wiki-section-label{font-size:0.58rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-.wiki-summary{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px;font-size:0.78rem;line-height:1.8;color:var(--text);min-height:120px;white-space:pre-wrap}
-.wiki-summary .placeholder{color:var(--muted);font-style:italic}
 .wiki-goals{display:flex;flex-direction:column;gap:8px}
 .goal-row{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:0.72rem}
 .goal-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0}
@@ -80,12 +75,13 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(0.5);cursor:po
 .wiki-send{background:var(--accent);border:none;border-radius:8px;color:#0e0e0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;padding:8px 16px;cursor:pointer;font-weight:500;transition:opacity 0.15s}
 .wiki-send:hover{opacity:0.85}
 .wiki-send:disabled{opacity:0.4;cursor:not-allowed}
-.wiki-inbox{margin-bottom:14px;display:flex;flex-direction:column;gap:4px;max-height:160px;overflow-y:auto}
-.wiki-inbox-empty{font-size:0.65rem;color:var(--muted);font-style:italic;padding:8px 0}
-.wiki-entry{font-size:0.7rem;color:var(--text);padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;line-height:1.5;display:flex;gap:8px;align-items:flex-start}
-.wiki-entry-time{font-size:0.55rem;color:var(--muted);white-space:nowrap;padding-top:2px;flex-shrink:0}
-.wiki-entry-text{flex:1;word-break:break-word}
 .wiki-toast{margin-top:10px;font-size:0.65rem;color:var(--green);min-height:1em}
+.trends-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:4px}
+.trend-metric{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.trend-metric-label{font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.trend-metric-value{font-family:'Fraunces',serif;font-size:1.25rem;color:var(--text)}
+.trend-metric-value.good{color:var(--green)}.trend-metric-value.warn{color:var(--warn)}.trend-metric-value.muted{color:var(--muted)}
+.trend-metric-sub{font-size:0.62rem;color:var(--muted);margin-top:2px}
 
 .tracker-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:24px}
 .tracker-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:26px 22px;text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:all 0.2s;position:relative;overflow:hidden;cursor:pointer;font-family:inherit}
@@ -309,8 +305,6 @@ input[type=file]{display:none}
 .m-tab.active{border-color:var(--accent);color:var(--accent2);background:var(--surface2)}
 .empty-state{text-align:center;padding:48px 20px;color:var(--muted);font-size:0.78rem;line-height:1.9}
 .es-icon{font-size:2rem;margin-bottom:12px;opacity:0.35}
-#chat-panel{position:fixed;right:0;top:0;bottom:0;width:380px;background:var(--surface);border-left:1px solid var(--border);display:none;flex-direction:column;z-index:100;transition:transform 0.3s ease}
-#chat-panel.open{display:flex}
 #fig-chat-panel{position:fixed;right:0;top:0;bottom:0;width:380px;background:var(--surface);border-left:1px solid var(--border);display:none;flex-direction:column;z-index:500;transition:transform 0.3s ease}
 #fig-chat-panel.open{display:flex}
 .chat-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
@@ -347,9 +341,10 @@ input[type=file]{display:none}
 
 @media(max-width:850px){
   .tracker-grid{grid-template-columns:1fr}
-  .wiki-body{grid-template-columns:1fr}
+  .trends-metrics{grid-template-columns:1fr}
 }
 @media(max-width:640px){
+  .trends-metrics{grid-template-columns:1fr}
   .earn-features{grid-template-columns:1fr}
   .dash-main,.top-bar,.dash-footer{padding-left:20px;padding-right:20px}
   .dash-footer{flex-direction:column;gap:10px;text-align:center}
@@ -398,38 +393,25 @@ input[type=file]{display:none}
     </div>
 
     <div class="dash-main">
-      <section class="wiki-card">
-        <div class="wiki-eyebrow">Your wiki</div>
+      <section class="wiki-card" id="trends-card">
+        <div class="wiki-eyebrow">Your trends</div>
         <div class="wiki-head">
           <div>
             <div class="wiki-title" id="wiki-title">Welcome back.</div>
             <div class="wiki-sub" id="wiki-sub">Fig stitches your habits, money, and goals into a personal wiki you actually read. Everything stays on your device.</div>
           </div>
-          <div class="wiki-meta">
-            <div><b id="wiki-streak">—</b>day streak</div>
-            <div><b id="wiki-entries">—</b>entries</div>
-            <div><b id="wiki-since">—</b>writing since</div>
-          </div>
         </div>
-        <div class="wiki-body">
-          <div>
-            <div class="wiki-section-label">Recent summary</div>
-            <div class="wiki-summary" id="wiki-summary"><span class="placeholder">Your summary will appear once you have a few days of health or finance entries logged.</span></div>
-          </div>
-          <div>
-            <div class="wiki-section-label">Active goals</div>
-            <div class="wiki-goals" id="wiki-goals">
-              <div class="goal-empty">No goals yet. Set one below or in Health / Finance.</div>
-            </div>
-          </div>
+        <div class="trends-metrics" id="trends-metrics"></div>
+        <div class="wiki-section-label" style="margin-top:18px;margin-bottom:8px">Active goals</div>
+        <div class="wiki-goals" id="wiki-goals">
+          <div class="goal-empty">No goals yet. Set one below or in Health / Finance.</div>
         </div>
-        <div class="wiki-inbox" id="wiki-inbox"></div>
-        <div class="wiki-input">
+        <div class="wiki-input" style="margin-top:18px">
           <div class="wiki-input-label">Quick note</div>
           <textarea id="wiki-text" placeholder="e.g. Slept 7h, ran 5k. Bought groceries $84."></textarea>
           <div class="wiki-input-row">
-            <div class="wiki-hint">Save a note or ask Fig about your data.</div>
-            <button class="wiki-send" id="wiki-send" onclick="sendWiki()">Save note →</button>
+            <div class="wiki-hint" id="note-hint">Save to a tracker based on what you write.</div>
+            <button class="wiki-send" id="wiki-send" onclick="sendQuickNote()">Save →</button>
           </div>
           <div class="wiki-toast" id="wiki-toast"></div>
         </div>
@@ -522,7 +504,7 @@ input[type=file]{display:none}
       <div id="health-loading-text">Loading Health…</div>
       <div id="health-loading-hint" style="font-size:0.65rem;color:var(--muted);max-width:380px;line-height:1.7;display:none">No health data found. Set up your goals to get started.</div>
     </div>
-    <div id="health-onboarding" style="display:none;max-width:500px;margin:0 auto;padding:80px 24px">
+    <div id="health-onboarding" style="display:none;max-width:640px;margin:0 auto;padding:80px 24px">
       <div class="ob-header">
         <div class="ob-logo">Fig Health</div>
         <div class="ob-tagline">Your wellness picture</div>
@@ -569,20 +551,6 @@ input[type=file]{display:none}
       <hr class="divider">
       <div class="section-title">Import / Export</div>
       <div id="health-csv-section"></div>
-    </div>
-    <div id="health-chat-panel" style="position:fixed;right:0;top:0;bottom:0;width:380px;background:var(--surface);border-left:1px solid var(--border);display:none;flex-direction:column;z-index:100">
-      <div class="chat-header">
-        <span class="chat-title">Health Coach</span>
-        <button class="chat-close" onclick="healthToggleChat()">✕</button>
-      </div>
-      <div class="chat-messages" id="health-chat-messages">
-        <div class="chat-msg system">I can see your health data. Ask about trends, goals, or anything wellness-related.</div>
-      </div>
-      <div class="chat-thinking" id="health-chat-thinking">Thinking…</div>
-      <div class="chat-input-area">
-        <input class="chat-input" id="health-chat-input" placeholder="Ask about your health…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();healthSendChat()}">
-        <button class="icon-btn" onclick="healthSendChat()" style="flex-shrink:0">→</button>
-      </div>
     </div>
   </div>
 
@@ -702,21 +670,6 @@ input[type=file]{display:none}
           days
           <button class="btn btn-secondary" style="padding:6px 14px;font-size:0.65rem" onclick="saveReminderDays()">Save</button>
         </div>
-      </div>
-    </div>
-    <div id="chat-panel">
-      <div class="chat-header">
-        <span class="chat-title">Ask Fig</span>
-        <button class="chat-close" onclick="toggleChat()">✕</button>
-      </div>
-      <div class="chat-messages" id="chat-messages">
-        <div class="chat-msg system">Fig has access to your financial data but never to raw transaction descriptions.</div>
-      </div>
-      <div class="chat-thinking" id="chat-thinking">Thinking...</div>
-      <div class="chat-suggested" id="chat-suggested"></div>
-      <div class="chat-input-area">
-        <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask about your finances..." onkeydown="chatKeydown(event)"></textarea>
-        <button class="chat-send" id="chat-send-btn" onclick="sendChat()">↑</button>
       </div>
     </div>
   </div>
@@ -1091,31 +1044,18 @@ function fmtSinceDate(iso){
 }
 function daysBetween(a,b){return Math.round((b-a)/86400000);}
 
-function renderWikiInbox(){
-  const wrap=document.getElementById('wiki-inbox');
-  if(!wrap)return;
-  try{
-    const inbox=JSON.parse(localStorage.getItem('fig_wiki_inbox')||'[]');
-    if(!inbox.length){wrap.innerHTML='<div class="wiki-inbox-empty">No entries yet. Log your first update above.</div>';return;}
-    wrap.innerHTML=inbox.slice(-10).reverse().map(e=>{
-      const d=new Date(e.ts);
-      const h=d.getHours().toString().padStart(2,'0');
-      const m=d.getMinutes().toString().padStart(2,'0');
-      return '<div class="wiki-entry"><span class="wiki-entry-time">'+h+':'+m+'</span><span class="wiki-entry-text">'+esc(e.text)+'</span></div>';
-    }).join('');
-  }catch{wrap.innerHTML='';}
-}
+const HEALTH_KEYWORDS = /weight|calorie|cal|protein|steps?|workout|run|ran|walk|ate|meal|food|diet|gym|exercise|swim|mood|water|slept|sleep|vitamin|supplement|meditate/i;
+const FINANCE_KEYWORDS = /spent|bought|paid|cost|dollars?|\$|groceries|transaction|bill|purchase|transfer|deposit|withdraw|salary|income|expense|invest/i;
 
-function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
-
-function buildWiki(health, finance){
+function renderTrends(health, finance){
+  const metricsEl=document.getElementById('trends-metrics');
   const goalsEl=document.getElementById('wiki-goals');
-  const summaryEl=document.getElementById('wiki-summary');
   const goals=[];
   let entryCount=0, streak=0, since=null;
-  renderWikiInbox();
+  const metrics=[];
+
   if(health&&health.config){
-    const{config,entries=[],habits={}}=health;
+    const{config,entries=[]}=health;
     entryCount+=entries.length;
     if(config.goalWeight){
       const latestW=[...entries].reverse().find(e=>e.weight!=null);
@@ -1133,8 +1073,19 @@ function buildWiki(health, finance){
     streak=Math.max(streak,s);
     if(entries.length){
       const first=entries[0]?.date; if(first&&(!since||new Date(first)<new Date(since)))since=first;
+      const latestW=[...entries].reverse().find(e=>e.weight!=null);
+      if(latestW&&config.startWeight){
+        const lost=+(config.startWeight-latestW.weight).toFixed(1);
+        const cls=lost>0?'good':lost<0?'warn':'muted';
+        metrics.push(`<div class="trend-metric"><div class="trend-metric-label">Weight</div><div class="trend-metric-value ${cls}">${latestW.weight}<span style="font-size:0.7rem;margin-left:4px">lbs</span></div><div class="trend-metric-sub">${lost>0?'↓ '+lost:lost<0?'↑ '+Math.abs(lost):'flat'} from ${config.startWeight}</div></div>`);
+      }
     }
   }
+
+  if(health||finance){
+    metrics.push(`<div class="trend-metric"><div class="trend-metric-label">Streak</div><div class="trend-metric-value">${streak||'—'}<span style="font-size:0.7rem;margin-left:4px">days</span></div><div class="trend-metric-sub">${entryCount} total entries</div></div>`);
+  }
+
   if(finance&&finance.config){
     const{config,months={}}=finance;
     const monthCount=Object.keys(months).length;
@@ -1144,7 +1095,18 @@ function buildWiki(health, finance){
       goals.push({label:config.goalName, meta});
     }
     if(config.createdAt&&(!since||new Date(config.createdAt)<new Date(since)))since=config.createdAt;
+    const keys=Object.keys(months).sort();
+    if(keys.length){
+      const avg=keys.slice(-3).reduce((s,k)=>s+Object.values(months[k]||{}).reduce((a,v)=>a+v,0),0)/Math.min(3,keys.length);
+      const sav=config.takeHome?config.takeHome-(config.fixedTotal||0)-avg:null;
+      if(sav!=null){
+        const cls=Math.max(0,sav)>0?'good':'warn';
+        metrics.push(`<div class="trend-metric"><div class="trend-metric-label">Cash flow</div><div class="trend-metric-value ${cls}">${fmt(Math.max(0,sav))}<span style="font-size:0.7rem;margin-left:4px">/mo</span></div><div class="trend-metric-sub">${Math.min(3,keys.length)}mo avg savings</div></div>`);
+      }
+    }
   }
+
+  if(metrics.length) metricsEl.innerHTML=metrics.join('');
   if(goals.length){
     goalsEl.innerHTML=goals.map(g=>`
       <div class="goal-row">
@@ -1153,31 +1115,7 @@ function buildWiki(health, finance){
         <div class="goal-meta">${g.meta||''}</div>
       </div>`).join('');
   }
-  const lines=[];
-  if(health&&health.config){
-    const{config,entries=[]}=health;
-    const latestW=[...entries].reverse().find(e=>e.weight!=null);
-    if(latestW&&config.startWeight){
-      const lost=+(config.startWeight-latestW.weight).toFixed(1);
-      lines.push(`Weight: ${latestW.weight} lbs (${lost>0?'down '+lost:lost<0?'up '+Math.abs(lost):'flat'} from ${config.startWeight}).`);
-    }
-    if(entries.length) lines.push(`${entries.length} health ${entries.length===1?'entry':'entries'} logged.`);
-  }
-  if(finance&&finance.config){
-    const{config,months={}}=finance;
-    const keys=Object.keys(months).sort();
-    if(keys.length){
-      const avg=keys.slice(-3).reduce((s,k)=>s+Object.values(months[k]||{}).reduce((a,v)=>a+v,0),0)/Math.min(3,keys.length);
-      const sav=config.takeHome?config.takeHome-(config.fixedTotal||0)-avg:null;
-      if(sav!=null) lines.push(`Cash flow: averaging ${fmt(Math.max(0,sav))}/mo savings across last ${Math.min(3,keys.length)} month${keys.length>1?'s':''}.`);
-    }
-  }
-  if(lines.length){
-    summaryEl.textContent=lines.join(' ');
-  }
-  document.getElementById('wiki-entries').textContent=entryCount||'0';
-  document.getElementById('wiki-streak').textContent=streak||'0';
-  document.getElementById('wiki-since').textContent=fmtSinceDate(since)||'—';
+
   if(entryCount){
     const hour=new Date().getHours();
     const greet=hour<5?'Still up?':hour<12?'Good morning.':hour<18?'Good afternoon.':'Good evening.';
@@ -1186,21 +1124,52 @@ function buildWiki(health, finance){
   }
 }
 
-async function sendWiki(){
+async function sendQuickNote(){
   const ta=document.getElementById('wiki-text');
   const toast=document.getElementById('wiki-toast');
+  const hint=document.getElementById('note-hint');
   const text=ta.value.trim();
   if(!text){toast.textContent='Type something first.';toast.style.color='var(--warn)';return;}
-  try{
-    const inbox=JSON.parse(localStorage.getItem('fig_wiki_inbox')||'[]');
-    inbox.push({ts:Date.now(),text});
-    localStorage.setItem('fig_wiki_inbox',JSON.stringify(inbox));
-  }catch{}
-  ta.value='';
-  toast.textContent='✓ Note saved. Ask Fig about your data with the 💬 button.';
-  toast.style.color='var(--green)';
-  renderWikiInbox();
-  setTimeout(()=>{toast.textContent='';},4000);
+
+  const healthData=getHealthData();
+  const isHealth=HEALTH_KEYWORDS.test(text);
+  const isFinance=FINANCE_KEYWORDS.test(text);
+
+  if(isHealth && healthData && healthData.config && healthData.entries!==undefined){
+    const today=new Date().toISOString().slice(0,10);
+    let entry=healthData.entries.find(e=>e.date===today);
+    if(!entry){
+      entry={date:today,weight:null,calories:null,protein:null,steps:null,notes:''};
+      healthData.entries.push(entry);
+    }
+    entry.notes=entry.notes?entry.notes+'\n'+text:text;
+    try{localStorage.setItem('ht_v4',JSON.stringify(healthData));}catch{}
+    ta.value='';
+    toast.textContent='✓ Saved to Health.';
+    toast.style.color='var(--green)';
+    if(hint) hint.textContent='Health note recorded.';
+  } else if(isFinance){
+    try{
+      const inbox=JSON.parse(localStorage.getItem('fig_wiki_inbox')||'[]');
+      inbox.push({ts:Date.now(),text,type:'finance'});
+      localStorage.setItem('fig_wiki_inbox',JSON.stringify(inbox));
+    }catch{}
+    ta.value='';
+    toast.textContent='✓ Note saved.';
+    toast.style.color='var(--green)';
+    if(hint) hint.textContent='Finance note recorded.';
+  } else {
+    try{
+      const inbox=JSON.parse(localStorage.getItem('fig_wiki_inbox')||'[]');
+      inbox.push({ts:Date.now(),text});
+      localStorage.setItem('fig_wiki_inbox',JSON.stringify(inbox));
+    }catch{}
+    ta.value='';
+    toast.textContent='✓ Note saved.';
+    toast.style.color='var(--green)';
+    if(hint) hint.textContent='General note recorded.';
+  }
+  setTimeout(()=>{toast.textContent='';},3000);
 }
 
 /* ── Global Chat ── */
@@ -1754,7 +1723,7 @@ async function init(){
   const finance=await getFinanceData();
   renderHealth(health);
   renderFinance(finance);
-  buildWiki(health,finance);
+  renderTrends(health,finance);
   renderAuthChip();
   handleHash();
 }

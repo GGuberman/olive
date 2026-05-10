@@ -6,7 +6,7 @@ let db = null;
 let charts = {};
 let dashConfig = null;
 let dashMonths = {};
-let chatHistory = [];
+let chatHistory = []; // kept for backward compat with stored chat data
 let obState = {
   step: 0,
   answers: {},
@@ -624,7 +624,6 @@ async function buildDashboard(config, months) {
   }
   renderGoal(config, months);
   buildManualRows(config);
-  initChat(config);
   document.getElementById('reminder-days').value = LS.get('fig_reminder_days') || 30;
 }
 
@@ -872,105 +871,7 @@ function saveReminderDays() {
   LS.set('fig_reminder_days', parseInt(document.getElementById('reminder-days').value)||30);
 }
 
-function initChat(config) {
-  const greeting = `Hi! I'm Fig. I can answer questions about your finances, update your config, and help you understand your numbers. What would you like to know?`;
-  if (chatHistory.length === 0) {
-    chatHistory = [{role:'assistant', content:greeting}];
-    renderChat();
-  }
-  const suggestions = [
-    'How am I tracking against my goal?',
-    'Where am I overspending?',
-    'What would happen if I cut food spending by $200?',
-    'Update my take-home to...',
-  ];
-  document.getElementById('chat-suggested').innerHTML = suggestions.map(s=>
-    `<button class="sug-btn" onclick="fillSuggestion(this)">${s}</button>`
-  ).join('');
-}
-
-function fillSuggestion(btn) {
-  document.getElementById('chat-input').value = btn.textContent;
-  document.getElementById('chat-input').focus();
-}
-
-function toggleChat() {
-  const panel = document.getElementById('chat-panel');
-  panel.classList.toggle('open');
-  document.getElementById('chat-toggle-btn').classList.toggle('active');
-}
-
-function chatKeydown(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
-}
-
-function renderChat() {
-  const container = document.getElementById('chat-messages');
-  const msgs = chatHistory.filter(m => m.role !== 'system');
-  container.innerHTML = msgs.map(m=>`<div class="chat-msg ${m.role}">${m.content.replace(/\n/g,'<br>')}</div>`).join('');
-  container.scrollTop = container.scrollHeight;
-}
-
-async function sendChat() {
-  const input = document.getElementById('chat-input');
-  const text = input.value.trim();
-  if (!text) return;
-  input.value = '';
-  chatHistory.push({role:'user', content:text});
-  renderChat();
-  const btn = document.getElementById('chat-send-btn');
-  btn.disabled = true;
-  document.getElementById('chat-thinking').classList.add('show');
-  const key = LS.get('fig_key');
-  if (!key) {
-    chatHistory.push({role:'assistant', content:'No API key connected. Open Settings and add your key to use the chat panel.'});
-    renderChat();
-    btn.disabled = false;
-    document.getElementById('chat-thinking').classList.remove('show');
-    return;
-  }
-  const monthKeys = Object.keys(dashMonths).sort();
-  const avgByCategory = {};
-  dashConfig.suggestedCategories.forEach(c=>{
-    const avg = monthKeys.length ? monthKeys.reduce((s,k)=>s+(dashMonths[k]?.[c.name]||0),0)/monthKeys.length : c.budget;
-    avgByCategory[c.name] = Math.round(avg);
-  });
-  const context = {
-    config: { goalName:dashConfig.goalName, takeHome:dashConfig.takeHome, fixedTotal:dashConfig.fixedTotal, targetAmount:dashConfig.targetAmount, targetYear:dashConfig.targetYear, showNetWorth:dashConfig.showNetWorth },
-    monthsOfData: monthKeys.length,
-    averageMonthlySpend: avgByCategory,
-    goalSaved: dashConfig.goalSaved || 0,
-  };
-  const systemPrompt = `You are Fig, a personal finance assistant. You have access to the user's financial summary data below. You never see raw transaction descriptions or personally identifying information.
-
-User's financial context:
-${JSON.stringify(context, null, 2)}
-
-If the user asks you to update a value (e.g. "update my take-home to $11,000"), respond with the answer AND include a JSON block like:
-<config_update>{"takeHome": 11000}</config_update>
-
-Be concise, specific to their data, and practical.`;
-  try {
-    const response = await callLLM(systemPrompt, text);
-    const updateMatch = response.match(/<config_update>([\s\S]*?)<\/config_update>/);
-    if (updateMatch) {
-      try {
-        const updates = JSON.parse(updateMatch[1]);
-        Object.assign(dashConfig, updates);
-        await dbPut('config', dashConfig, 'main');
-        buildDashboard(dashConfig, dashMonths);
-      } catch(e) {}
-    }
-    const cleanResponse = response.replace(/<config_update>[\s\S]*?<\/config_update>/g, '').trim();
-    chatHistory.push({role:'assistant', content:cleanResponse});
-    await dbPut('chat', {role:'assistant', content:cleanResponse, ts:Date.now()});
-  } catch(e) {
-    chatHistory.push({role:'assistant', content:'Something went wrong. Check your API key and try again.'});
-  }
-  renderChat();
-  btn.disabled = false;
-  document.getElementById('chat-thinking').classList.remove('show');
-}
+/* ── Chat (uses global fig-chat-panel) ── */
 
 function handlePasscode() {
   const val = document.getElementById('pc-input').value;
@@ -1181,10 +1082,6 @@ window.skipProfileStep = skipProfileStep;
 window.useTemplate = useTemplate;
 window.launchDashboard = launchDashboard;
 window.selectMonth = selectMonth;
-window.toggleChat = toggleChat;
-window.chatKeydown = chatKeydown;
-window.fillSuggestion = fillSuggestion;
-window.sendChat = sendChat;
 window.handlePasscode = handlePasscode;
 window.scrollToUpload = scrollToUpload;
 window.dismissBanner = dismissBanner;

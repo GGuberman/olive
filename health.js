@@ -565,62 +565,7 @@ function healthImportCSV(event) {
   event.target.value = '';
 }
 
-/* ── Chat ── */
-window.healthToggleChat = function() {
-  const panel = document.getElementById('health-chat-panel');
-  const toggle = document.getElementById('health-chat-toggle');
-  if (!panel) return;
-  const isOpen = panel.style.display === 'flex';
-  panel.style.display = isOpen ? 'none' : 'flex';
-  if (toggle) toggle.classList.toggle('active', !isOpen);
-  if (!isOpen) document.getElementById('health-chat-input').focus();
-};
-
-window.healthSendChat = async function() {
-  const input = document.getElementById('health-chat-input');
-  const msg = input.value.trim();
-  if (!msg) return;
-  input.value = '';
-  const container = document.getElementById('health-chat-messages');
-  container.innerHTML += `<div class="chat-msg user">${msg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
-  container.scrollTop = container.scrollHeight;
-
-  const thinking = document.getElementById('health-chat-thinking');
-  if (thinking) thinking.classList.add('show');
-
-  try {
-    const c = healthData.config;
-    const stats = computeHealthStats();
-    const systemPrompt = `You are a health coach assistant for Fig Health. The user has the following profile:
-- Goal weight: ${c.goalWeight}lbs
-- Starting weight: ${c.startWeight}lbs
-- Calorie target: ${c.calGoal}/day
-- Protein target: ${c.proteinGoal}g/day
-- Streak: ${stats.streak} days
-- Total entries: ${stats.totalEntries}
-- Latest weight: ${stats.latestWeight || 'not recorded'}
-Be concise, practical, and encouraging. Use their actual data when relevant.`;
-
-    let reply = '';
-    const provider = c.llmProvider || 'anthropic';
-    const key = c.llmKey;
-    if (!key) {
-      reply = 'No API key connected. Go to Settings (⚙) to add one.';
-    } else {
-      try {
-        reply = await window.figCallLLM(systemPrompt, msg, provider, key);
-      } catch (e) {
-        reply = 'Error: ' + (e.message || e);
-      }
-    }
-    if (thinking) thinking.classList.remove('show');
-    container.innerHTML += `<div class="chat-msg assistant">${reply.replace(/\n/g, '<br>')}</div>`;
-    container.scrollTop = container.scrollHeight;
-  } catch (e) {
-    if (thinking) thinking.classList.remove('show');
-    container.innerHTML += `<div class="chat-msg assistant" style="color:var(--red)">Error: ${e.message}</div>`;
-  }
-};
+/* ── Chat (uses global fig-chat-panel) ── */
 
 /* ── Settings ── */
 window.healthOpenSettings = function() {

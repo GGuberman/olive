@@ -151,10 +151,6 @@ function figRenderAccount() {
       <button class="fig-btn primary" onclick="figCreateEmailAccount()" style="padding:8px 18px;font-size:0.68rem">Sign up / Sign in →</button>
       <span id="fig-acc-toast" class="fig-toast" style="min-height:0"></span>
     </div>
-    <details style="margin-top:16px;font-size:0.72rem;color:var(--muted,#6b6880)" ontoggle="if(this.open)figRenderWorkerOption()">
-      <summary style="cursor:pointer;color:var(--muted,#6b6880);font-size:0.65rem;letter-spacing:0.08em">Advanced: Fig Handle (needs Worker)</summary>
-      <div id="fig-acc-worker-option" style="margin-top:12px"></div>
-    </details>
     <div class="fig-btn-row">
       <button class="fig-btn ghost" onclick="figDismissLauncher()">Skip — just show me the app</button>
       <span class="fig-spacer"></span>
@@ -214,43 +210,6 @@ async function figSimpleHash(str) {
   }
 }
 
-function figCreateWorkerAccount() {
-  var input = document.getElementById('fig-acc-worker-handle');
-  if (!input) return;
-  var handle = input.value.trim();
-  if (!handle) { input.focus(); return; }
-  if (!/^[a-zA-Z0-9_-]{2,32}$/.test(handle)) {
-    alert('Invalid handle. Use letters, numbers, _ and - (2-32 chars).');
-    return;
-  }
-  var sync = figGetSync();
-  var workerUrl = sync && sync.workerUrl;
-  if (!workerUrl) { alert('Worker URL not configured. Set it in Settings → Cloud sync first.'); return; }
-  var toast = document.getElementById('fig-acc-toast');
-  if (toast) { toast.className = 'fig-toast'; toast.textContent = 'Creating…'; }
-  var btn = document.querySelector('#fig-acc-toast') && document.querySelector('#fig-acc-toast').previousElementSibling;
-  if (btn) btn.disabled = true;
-  fetch(workerUrl.replace(/\/$/, '') + '/auth/register', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: handle })
-  }).then(function(r) { return r.json().then(function(d) { return { ok: r.ok, status: r.status, data: d }; }); })
-  .then(function(res) {
-    if (!res.ok) {
-      if (res.status === 409) { alert('Handle taken. Try another.'); if (btn) btn.disabled = false; return; }
-      throw new Error(res.data.error || ('HTTP ' + res.status));
-    }
-    var cfg = figGetConfig();
-    if (!cfg.identity) cfg.identity = {};
-    cfg.identity.worker = { handle: res.data.username, token: res.data.token, createdAt: new Date().toISOString() };
-    figSetConfig(cfg);
-    if (toast) { toast.className = 'fig-toast ok'; toast.textContent = '✓ Created @' + res.data.username; }
-    setTimeout(function() { render(); }, 600);
-  }).catch(function(e) {
-    if (toast) { toast.className = 'fig-toast err'; toast.textContent = 'Failed: ' + (e.message || e); }
-    if (btn) btn.disabled = false;
-  });
-}
-
 function figSignOut() {
   var cfg = figGetConfig();
   if (cfg.identity && cfg.identity.email) delete cfg.identity.email;
@@ -289,26 +248,6 @@ function figIdentCreateAccount() {
   });
 }
 
-function figRenderWorkerOption() {
-  var el = document.getElementById('fig-acc-worker-option');
-  if (!el) return;
-  var sync = figGetSync();
-  var hasWorkerUrl = sync && sync.workerUrl;
-  el.innerHTML = hasWorkerUrl ? `
-    <div class="fig-field">
-      <label>Fig Handle</label>
-      <input id="fig-acc-worker-handle" type="text" placeholder="e.g. gg" maxlength="32" autocomplete="off" onkeydown="if(event.key==='Enter')figCreateWorkerAccount()">
-      <div class="fig-field-help">2–32 characters: letters, numbers, _ and -</div>
-    </div>
-    <div class="fig-btn-row" style="padding-top:0">
-      <button class="fig-btn primary" onclick="figCreateWorkerAccount()" style="padding:8px 18px;font-size:0.68rem">Create Handle</button>
-    </div>` : `
-    <div style="background:var(--surface2,#1a1a26);padding:12px 14px;border-radius:8px;font-size:0.68rem;line-height:1.7">
-      To create a Fig Handle, deploy the Fig Worker and set the Worker URL in <b>Settings → Cloud sync</b>.
-    </div>`;
-}
-
-// ── Identity step ─────────────────────────────
 function figRenderIdentity() {
   var cfg = figGetConfig();
   var ident = cfg.identity || {};
@@ -496,7 +435,7 @@ async function figToggleWid() {
   }
   if (!appId) {
     toast.className = 'fig-toast err';
-    toast.textContent = 'No World ID App ID. Configure it in Settings → World ID, or set a Worker URL in Cloud sync.';
+    toast.textContent = 'Set an App ID in Settings → World ID first.';
     return;
   }
   var signal = ident.worker?.handle || 'fig-user';

@@ -26,15 +26,21 @@ test.describe('World ID — Settings UI', () => {
 
   test('refuses to start without an App ID or Worker URL', async ({ page }) => {
     await page.click('#sec-wid button:has-text("Sign in with World ID")');
-    await expect(page.locator('#wid-toast')).toContainText('World ID App ID');
+    await expect(page.locator('#wid-toast')).toContainText('App ID');
+    // Dismiss the settings overlay
+    await page.evaluate(() => document.querySelector('.modal-overlay')?.remove());
   });
 
   test('accepts App ID directly without Worker', async ({ page }) => {
-    // Fill in an App ID directly — should pass App ID validation
-    await page.fill('#wid-app-id', 'app_staging_fake');
+    await page.goto('/index.html');
+    await page.evaluate(() => window.figDismissLauncher());
+    // Open Settings modal
+    await page.evaluate(() => window.openSettings());
+    // Type an App ID directly in the World ID field
+    await page.fill('#wid-app-id', 'app_123456');
     await page.click('#sec-wid button:has-text("Sign in with World ID")');
-    // Should NOT show the "App ID required" error — IDKit failing is expected in test env
-    await expect(page.locator('#wid-toast')).not.toContainText('World ID App ID');
+    // Should NOT show the "App ID" error — IDKit failing is expected in test env
+    await expect(page.locator('#wid-toast')).not.toContainText('App ID');
   });
 
   test('connected state renders the verified pill, nullifier, and chip', async ({ page }) => {

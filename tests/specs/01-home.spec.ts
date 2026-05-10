@@ -55,10 +55,10 @@ test.describe('Home page', () => {
     await expect(page.locator('#finance-badge')).toContainText('not set up');
   });
 
-  test('wiki summary shows placeholder on fresh state', async ({ page }) => {
+  test('trends card shows on fresh state', async ({ page }) => {
     await page.goto('/index.html');
-    await expect(page.locator('.wiki-summary .placeholder')).toBeVisible();
-    await expect(page.locator('#wiki-streak')).toHaveText('0');
-    await expect(page.locator('#wiki-entries')).toHaveText('0');
+    await expect(page.locator('#trends-card')).toBeVisible();
+    await expect(page.locator('#wiki-title')).toContainText('Welcome');
+    await expect(page.locator('#trends-card')).toContainText('Active goals');
   });
 });
