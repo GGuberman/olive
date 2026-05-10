@@ -1,13 +1,14 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Health page', () => {
-  test('React root mounts something', async ({ page }) => {
+  test('loads and shows onboarding when no data', async ({ page }) => {
     const errors: string[] = [];
     page.on('pageerror', e => errors.push(e.message));
 
     await page.goto('/index.html#health');
-    // Wait for React bundle to mount and render content
-    await expect(page.locator('#root')).not.toBeEmpty({ timeout: 15000 });
+    // Wait for health.js to load and render onboarding
+    await expect(page.locator('#health-onboarding')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('#health-onboarding .ob-logo')).toHaveText('Fig Health');
 
     expect(errors, `pageerrors: ${errors.join('; ')}`).toEqual([]);
   });

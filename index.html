@@ -511,10 +511,76 @@ input[type=file]{display:none}
   <!-- ═══════════ HEALTH VIEW ═══════════ -->
   <div class="view" id="view-health">
     <div style="position:fixed;top:12px;left:68px;z-index:999;display:flex;gap:6px">
-      <button onclick="navigateTo('dashboard')" style="background:#0a0a0f;border:1px solid #252535;border-radius:6px;padding:5px 10px;color:#c4aaff;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer">← Fig</button>
-      <button onclick="openFigSettings()" style="background:#0a0a0f;border:1px solid #252535;border-radius:6px;padding:5px 10px;color:#6b6880;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer">⚙</button>
+      <button onclick="navigateTo('dashboard')" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--accent2);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer">← Fig</button>
+      <button onclick="openFigSettings()" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--muted);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer">⚙</button>
+      <button onclick="healthEmergencyReset()" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--muted);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer">Reset</button>
     </div>
-    <div id="root"></div>
+    <div id="health-loading" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:var(--muted);font-size:0.8rem;letter-spacing:0.1em;gap:14px;padding:0 24px;text-align:center">
+      <div id="health-loading-text">Loading Health…</div>
+      <div id="health-loading-hint" style="font-size:0.65rem;color:var(--muted);max-width:380px;line-height:1.7;display:none">No health data found. Set up your goals to get started.</div>
+    </div>
+    <div id="health-onboarding" style="display:none;max-width:500px;margin:0 auto;padding:80px 24px">
+      <div class="ob-header">
+        <div class="ob-logo">Fig Health</div>
+        <div class="ob-tagline">Your wellness picture</div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="health-ob-progress" style="width:0%"></div></div>
+      <div id="health-ob-content"></div>
+    </div>
+    <div id="health-dashboard" style="display:none;padding:40px 32px;max-width:960px;margin:0 auto;width:100%">
+      <header>
+        <div>
+          <h1>Health Picture</h1>
+          <div class="subtitle" id="health-dash-subtitle"></div>
+        </div>
+        <div class="header-actions">
+          <div style="display:flex;gap:8px">
+            <button class="icon-btn active" id="health-chat-toggle" onclick="healthToggleChat()">💬 Ask Fig</button>
+            <button class="icon-btn" onclick="healthOpenSettings()">⚙ Settings</button>
+          </div>
+          <div class="goal-pill" id="health-goal-pill"></div>
+        </div>
+      </header>
+      <div class="section-title">Today</div>
+      <div class="grid-4" id="health-stats-grid"></div>
+      <div class="chart-card">
+        <div class="section-title" style="margin-bottom:8px">Weight</div>
+        <div id="health-weight-chart" style="min-height:180px"></div>
+      </div>
+      <div class="grid-2" id="health-entry-grid">
+        <div class="chart-card" style="margin-bottom:0">
+          <div class="section-title" style="margin-bottom:8px">Add Entry</div>
+          <div id="health-entry-form"></div>
+        </div>
+        <div class="chart-card" style="margin-bottom:0">
+          <div class="section-title" style="margin-bottom:8px">Habits & Mood</div>
+          <div id="health-habits-mood"></div>
+        </div>
+      </div>
+      <hr class="divider">
+      <div class="section-title">Recent Entries</div>
+      <div id="health-entries-table"></div>
+      <hr class="divider">
+      <div class="section-title">Workouts</div>
+      <div id="health-workouts"></div>
+      <hr class="divider">
+      <div class="section-title">Import / Export</div>
+      <div id="health-csv-section"></div>
+    </div>
+    <div id="health-chat-panel" style="position:fixed;right:0;top:0;bottom:0;width:380px;background:var(--surface);border-left:1px solid var(--border);display:none;flex-direction:column;z-index:100">
+      <div class="chat-header">
+        <span class="chat-title">Health Coach</span>
+        <button class="chat-close" onclick="healthToggleChat()">✕</button>
+      </div>
+      <div class="chat-messages" id="health-chat-messages">
+        <div class="chat-msg system">I can see your health data. Ask about trends, goals, or anything wellness-related.</div>
+      </div>
+      <div class="chat-thinking" id="health-chat-thinking">Thinking…</div>
+      <div class="chat-input-area">
+        <input class="chat-input" id="health-chat-input" placeholder="Ask about your health…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();healthSendChat()}">
+        <button class="icon-btn" onclick="healthSendChat()" style="flex-shrink:0">→</button>
+      </div>
+    </div>
   </div>
 
   <!-- ═══════════ FINANCE VIEW ═══════════ -->
@@ -871,14 +937,11 @@ function activateView(view) {
   if (view === 'health' && !_healthLoaded) {
     _healthLoaded = true;
     var script = document.createElement('script');
-    script.src = 'health-bundle.js';
+    script.src = 'health.js';
     script.onerror = function() {
-      console.error('Failed to load health-bundle.js');
-    };
-    script.onload = function() {
-      // health-bundle.js mounts on DOMContentLoaded, which already fired.
-      // Dispatch it to trigger the React mount.
-      document.dispatchEvent(new Event('DOMContentLoaded'));
+      console.error('Failed to load health.js');
+      var el = document.getElementById('health-loading');
+      if (el) { el.style.display = 'flex'; el.style.color = 'var(--red)'; el.innerHTML = 'Error: script failed to load'; }
     };
     document.body.appendChild(script);
   }

@@ -15,7 +15,7 @@ test.describe('Finance page', () => {
     await page.evaluate(() => window.figDismissLauncher());
     await expect(page.locator('#app-loading')).toBeHidden({ timeout: 15000 });
     await expect(page.locator('#onboarding')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('.ob-logo')).toContainText('Fig Finance');
+    await expect(page.locator('#onboarding .ob-logo')).toContainText('Fig Finance');
 
     await page.waitForTimeout(500);
     expect(errors, `pageerrors: ${errors.join('; ')}`).toEqual([]);
