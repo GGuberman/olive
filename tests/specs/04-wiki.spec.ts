@@ -10,8 +10,8 @@ test.describe('Wiki input', () => {
 
   test('saves an entry to the inbox', async ({ page }) => {
     await page.fill('#wiki-text', 'Slept 8 hours, ran 5k, ate well');
-    await page.click('text=Add to wiki');
-    await expect(page.locator('#wiki-toast')).toContainText('Saved');
+    await page.click('text=Save note');
+    await expect(page.locator('#wiki-toast')).toContainText('Note saved');
 
     const inbox = await page.evaluate(() =>
       JSON.parse(localStorage.getItem('fig_wiki_inbox') || '[]')
@@ -22,7 +22,7 @@ test.describe('Wiki input', () => {
   });
 
   test('rejects empty input', async ({ page }) => {
-    await page.click('text=Add to wiki');
+    await page.click('text=Save note');
     await expect(page.locator('#wiki-toast')).toContainText('Type something');
     const inbox = await page.evaluate(() =>
       JSON.parse(localStorage.getItem('fig_wiki_inbox') || '[]')
@@ -33,7 +33,7 @@ test.describe('Wiki input', () => {
   test('appends multiple entries', async ({ page }) => {
     for (const t of ['ran 5k', 'cooked dinner', 'paid rent']) {
       await page.fill('#wiki-text', t);
-      await page.click('text=Add to wiki');
+      await page.click('text=Save note');
       await page.waitForTimeout(50);
     }
     const inbox = await page.evaluate(() =>
@@ -44,7 +44,7 @@ test.describe('Wiki input', () => {
 
   test('clears the textarea after submit', async ({ page }) => {
     await page.fill('#wiki-text', 'something');
-    await page.click('text=Add to wiki');
+    await page.click('text=Save note');
     await expect(page.locator('#wiki-text')).toHaveValue('');
   });
 });
