@@ -150,6 +150,7 @@ function showHealthDashboard() {
   document.getElementById('health-loading').style.display = 'none';
   document.getElementById('health-onboarding').style.display = 'none';
   document.getElementById('health-dashboard').style.display = 'block';
+  healthInitPhotoDB(); // async, fire-and-forget for photo storage
   renderHealthDashboard();
 }
 
@@ -215,6 +216,7 @@ function renderHealthDashboard() {
   renderHealthHabitsMood();
   renderHealthEntriesTable(s);
   renderHealthWorkouts();
+  renderHealthMealsSection();
   renderHealthCSVSection();
 }
 
@@ -282,11 +284,18 @@ function renderHealthEntryForm(s) {
       <label style="font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px">Notes</label>
       <textarea id="he-notes" rows="2" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text);font-size:0.78rem;width:100%;outline:none;resize:vertical;font-family:inherit">${today.notes || ''}</textarea>
     </div>
+    <div id="he-photo-section"></div>
     <div style="display:flex;gap:8px;align-items:center">
       <button class="btn btn-primary" onclick="healthSaveEntry()" style="padding:8px 18px;font-size:0.7rem">Save entry</button>
       <span id="he-toast" style="font-size:0.65rem;color:var(--green);min-height:1em"></span>
     </div>
   `;
+  // Mount photo upload UI and refresh
+  const ps = document.getElementById('he-photo-section');
+  if (ps) {
+    ps.appendChild(healthPhotoUploadUI(currentDate));
+    healthRefreshPhotos(currentDate);
+  }
 }
 
 function healthSaveEntry() {
@@ -367,7 +376,7 @@ function healthSetWater(n) {
 }
 
 /* ── Entries Table ── */
-function renderHealthEntriesTable(s) {
+async function renderHealthEntriesTable(s) {
   const sorted = [...healthData.entries].sort((a, b) => b.date.localeCompare(a.date));
   if (sorted.length === 0) {
     document.getElementById('health-entries-table').innerHTML = `<div class="empty-state"><div class="es-icon">📋</div>No entries yet. Add your first one above.</div>`;
@@ -384,13 +393,26 @@ function renderHealthEntriesTable(s) {
       <th style="padding:8px 10px"></th>
     </tr></thead>
     <tbody>`;
+  // Load photo counts for all visible entries
+  const photoCounts = {};
+  const photoDates = sorted.slice(0, 50).map(e => e.date);
+  // Only check IndexedDB if it's initialized
+  if (healthPhotoDB) {
+    await Promise.all(photoDates.map(async d => {
+      const photos = await healthGetPhotosForDate(d);
+      if (photos.length > 0) photoCounts[d] = photos.length;
+    }));
+  }
   sorted.slice(0, 50).forEach(e => {
+    const pc = photoCounts[e.date];
+    const photoBadge = pc ? `<span style="cursor:pointer;color:var(--accent2)" onclick="healthShowDatePhotos('${e.date}')" title="${pc} food photo${pc>1?'s':''}">📷 ${pc}</span>` : '';
     html += `<tr style="border-bottom:1px solid var(--border)">
       <td style="padding:8px 10px;color:var(--accent2)">${e.date}</td>
       <td style="padding:8px 10px;text-align:right">${e.weight || '—'}</td>
       <td style="padding:8px 10px;text-align:right">${e.calories || '—'}</td>
       <td style="padding:8px 10px;text-align:right">${e.protein || '—'}</td>
       <td style="padding:8px 10px;text-align:right">${e.steps || '—'}</td>
+      <td style="padding:8px 10px;text-align:center;font-size:0.7rem">${photoBadge}</td>
       <td style="padding:8px 10px;color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.notes || ''}</td>
       <td style="padding:8px 10px"><button class="s-btn" onclick="healthDeleteEntry('${e.date}')" style="font-size:0.55rem;color:var(--red)">✕</button></td>
     </tr>`;
@@ -483,6 +505,224 @@ function healthDeleteWorkout(idx) {
   saveHealthData();
   renderHealthDashboard();
 }
+
+/* ── Meals Section ── */
+function renderHealthMealsSection() {
+  renderHealthMealsContent();
+}
+
+async function renderHealthMealsContent() {
+  const content = document.getElementById('health-meals-content');
+  if (!content) return;
+  if (!healthPhotoDB) await healthInitPhotoDB();
+  const entries = [...healthData.entries].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 14);
+  let hasPhotos = false;
+  let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px">';
+  for (const e of entries) {
+    const photos = await healthGetPhotosForDate(e.date);
+    if (photos.length === 0) continue;
+    hasPhotos = true;
+    html += `<div style="cursor:pointer" onclick="healthShowDatePhotos('${e.date}')">
+      <img src="${photos[0].dataUrl}" style="width:100%;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+      <div style="font-size:0.55rem;color:var(--muted);margin-top:2px;text-align:center">${e.date} · ${photos.length}</div>
+    </div>`;
+  }
+  html += '</div>';
+  if (!hasPhotos) {
+    html = '<div class="empty-state" style="padding:20px"><div class="es-icon">🍽️</div>Add food photos to your daily entry to track meals.</div>';
+  }
+  content.innerHTML = html;
+}
+
+/* ── Food Photos (IndexedDB) ── */
+let healthPhotoDB = null;
+
+function healthInitPhotoDB() {
+  return new Promise((resolve) => {
+    if (healthPhotoDB) { resolve(healthPhotoDB); return; }
+    try {
+      const req = indexedDB.open('fig_health_photos', 1);
+      req.onupgradeneeded = e => {
+        const d = e.target.result;
+        if (!d.objectStoreNames.contains('photos'))
+          d.createObjectStore('photos', { keyPath: 'date' });
+      };
+      req.onsuccess = e => { healthPhotoDB = e.target.result; resolve(healthPhotoDB); };
+      req.onerror = () => { resolve(null); };
+      req.onblocked = () => { resolve(null); };
+    } catch (e) { resolve(null); }
+  });
+}
+
+function healthGetPhotosForDate(date) {
+  return new Promise((resolve) => {
+    if (!healthPhotoDB) { resolve([]); return; }
+    try {
+      const tx = healthPhotoDB.transaction('photos', 'readonly');
+      const req = tx.objectStore('photos').get(date);
+      req.onsuccess = () => resolve(req.result ? req.result.photos : []);
+      req.onerror = () => resolve([]);
+    } catch (e) { resolve([]); }
+  });
+}
+
+function healthSavePhoto(date, dataUrl, notes) {
+  return new Promise((resolve) => {
+    if (!healthPhotoDB) { resolve(false); return; }
+    try {
+      const tx = healthPhotoDB.transaction('photos', 'readwrite');
+      const getReq = tx.objectStore('photos').get(date);
+      getReq.onsuccess = () => {
+        const existing = getReq.result || { date, photos: [] };
+        existing.photos.push({ id: Date.now(), dataUrl, notes: notes || '', ts: Date.now() });
+        tx.objectStore('photos').put(existing);
+      };
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    } catch (e) { resolve(false); }
+  });
+}
+
+function healthDeletePhoto(date, photoId) {
+  return new Promise((resolve) => {
+    if (!healthPhotoDB) { resolve(false); return; }
+    try {
+      const tx = healthPhotoDB.transaction('photos', 'readwrite');
+      const getReq = tx.objectStore('photos').get(date);
+      getReq.onsuccess = () => {
+        const existing = getReq.result;
+        if (!existing) { resolve(false); return; }
+        existing.photos = existing.photos.filter(p => p.id !== photoId);
+        if (existing.photos.length === 0) {
+          tx.objectStore('photos').delete(date);
+        } else {
+          tx.objectStore('photos').put(existing);
+        }
+      };
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    } catch (e) { resolve(false); }
+  });
+}
+
+function healthShowPhotoLightbox(dataUrl, date, notes) {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay open';
+  overlay.onclick = function (e) { if (e.target === overlay) overlay.remove(); };
+  overlay.style.cursor = 'zoom-out';
+  overlay.innerHTML = `
+    <div style="max-width:90vw;max-height:90vh;text-align:center;position:relative">
+      <img src="${dataUrl}" style="max-width:100%;max-height:80vh;border-radius:12px;border:1px solid var(--border)">
+      <button onclick="this.closest('.modal-overlay').remove()" style="position:absolute;top:-30px;right:0;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer">✕</button>
+      ${notes ? `<div style="margin-top:8px;font-size:0.75rem;color:var(--muted)">${notes}</div>` : ''}
+      <div style="margin-top:4px;font-size:0.6rem;color:var(--muted)">${date}</div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function healthPhotoUploadUI(date) {
+  const container = document.createElement('div');
+  container.id = 'health-photo-upload';
+  container.style.cssText = 'margin-top:10px';
+  container.innerHTML = `
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+      <label class="s-btn" style="cursor:pointer;font-size:0.7rem">📷 Add food photo<input type="file" accept="image/*" capture="environment" onchange="healthHandlePhotoUpload(event)" style="display:none"></label>
+      <span id="health-photo-status" style="font-size:0.65rem;color:var(--muted)"></span>
+    </div>
+    <div id="health-photo-thumbs" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+  `;
+  return container;
+}
+
+async function healthRefreshPhotos(date) {
+  const thumbs = document.getElementById('health-photo-thumbs');
+  const status = document.getElementById('health-photo-status');
+  if (!thumbs) return;
+  const photos = await healthGetPhotosForDate(date);
+  if (photos.length === 0) {
+    thumbs.innerHTML = '<span style="font-size:0.62rem;color:var(--muted)">No food photos for this date.</span>';
+    if (status) status.textContent = '';
+    return;
+  }
+  thumbs.innerHTML = photos.map(p => `
+    <div style="position:relative;display:inline-block">
+      <img src="${p.dataUrl}" onclick="healthShowPhotoLightbox('${p.dataUrl}','${date}','${(p.notes||'').replace(/'/g,"\\'")}')"
+        style="width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer">
+      <button onclick="healthRemovePhoto('${date}',${p.id})"
+        style="position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;border:none;background:var(--red);color:#fff;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>`).join('');
+  if (status) status.textContent = `${photos.length} photo${photos.length > 1 ? 's' : ''}`;
+}
+
+window.healthHandlePhotoUpload = async function (event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  const status = document.getElementById('health-photo-status');
+  if (status) status.textContent = 'Reading image…';
+  const reader = new FileReader();
+  reader.onload = async function (e) {
+    const dataUrl = e.target.result;
+    // Compress large images (resize if > 1200px)
+    const img = new Image();
+    img.onload = async function () {
+      let finalUrl = dataUrl;
+      if (img.width > 1200 || img.height > 1200) {
+        const canvas = document.createElement('canvas');
+        const scale = Math.min(1200 / img.width, 1200 / img.height);
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        finalUrl = canvas.toDataURL('image/jpeg', 0.8);
+      }
+      const date = currentDate;
+      const saved = await healthSavePhoto(date, finalUrl, '');
+      if (saved) {
+        if (status) status.textContent = '✓ Photo saved';
+        await healthRefreshPhotos(date);
+        // Also re-render the entries table to show photo indicator
+        renderHealthEntriesTable(computeHealthStats());
+      } else {
+        if (status) status.textContent = '✕ Failed to save photo';
+      }
+    };
+    img.src = dataUrl;
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+};
+
+window.healthRemovePhoto = async function (date, photoId) {
+  await healthDeletePhoto(date, photoId);
+  await healthRefreshPhotos(date);
+  renderHealthEntriesTable(computeHealthStats());
+};
+
+window.healthShowDatePhotos = async function (date) {
+  const photos = await healthGetPhotosForDate(date);
+  if (!photos.length) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay open';
+  overlay.onclick = function (e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML = `
+    <div class="modal" onclick="event.stopPropagation()" style="width:560px">
+      <div class="modal-header">
+        <div class="modal-title">📷 Food photos — ${date}</div>
+        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">✕</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        ${photos.map(p => `
+          <div style="position:relative">
+            <img src="${p.dataUrl}" onclick="healthShowPhotoLightbox('${p.dataUrl}','${date}','${(p.notes||'').replace(/'/g,"\\'")}')"
+              style="width:100%;height:160px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer">
+            ${p.notes ? `<div style="font-size:0.65rem;color:var(--muted);margin-top:4px">${p.notes}</div>` : ''}
+            <button onclick="healthRemovePhoto('${date}',${p.id});this.closest('div').remove()"
+              style="position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;border:none;background:var(--red);color:#fff;font-size:11px;cursor:pointer">✕</button>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+};
 
 /* ── CSV Import/Export ── */
 function renderHealthCSVSection() {

@@ -4,9 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fig</title>
-<script src="https://cdn.jsdelivr.net/npm/@worldcoin/idkit-standalone@1.4.2/build/index.global.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+<!-- IDKit Core v4 (new) — loads as ESM module, exposes to window.__figIDKit -->
+<script type="module">
+import { IDKit, orbLegacy } from 'https://esm.sh/@worldcoin/idkit-core@4';
+import { signRequest } from 'https://esm.sh/@worldcoin/idkit-core@4/signing';
+window.__figIDKit = { IDKit, orbLegacy, signRequest };
+console.log('IDKit Core v4 loaded');
+</script>
+<!-- IDKit Standalone v1 (fallback) — kept for browsers that don't support module scripts -->
+<script src="https://cdn.jsdelivr.net/npm/@worldcoin/idkit-standalone@1.4.2/build/index.global.js" defer></script>
 <script src="fig-shared.js"></script>
 <script src="launcher.js"></script>
 <style>
@@ -24,17 +32,18 @@ input,textarea,button,select{font-family:'Inter',-apple-system,BlinkMacSystemFon
 input[type=date]::-webkit-calendar-picker-indicator{filter:invert(0.5);cursor:pointer}
 
 /* ── Sidebar ── */
-.sidebar{position:fixed;left:0;top:0;bottom:0;width:56px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:12px 0;z-index:999;gap:2px}
-.sidebar-logo{font-family:'Fraunces',serif;font-size:1.1rem;color:var(--accent2);margin-bottom:12px;padding:8px 0;width:100%;text-align:center;letter-spacing:-0.02em;cursor:pointer;text-decoration:none}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:180px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:0;z-index:999}
+.sidebar-logo{font-family:'Fraunces',serif;font-size:1.2rem;color:var(--accent2);padding:20px 20px 16px;cursor:pointer;text-decoration:none;letter-spacing:-0.02em;border-bottom:1px solid var(--border)}
 .sidebar-logo:hover{color:var(--accent2)}
-.sidebar-nav{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;width:100%}
-.sidebar-btn{width:40px;height:40px;border-radius:10px;border:none;background:transparent;color:var(--muted);font-size:1.1rem;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;text-decoration:none;position:relative}
+.sidebar-nav{flex:1;display:flex;flex-direction:column;gap:2px;padding:8px 10px}
+.sidebar-btn{width:100%;height:38px;border-radius:8px;border:none;background:transparent;color:var(--muted);cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:10px;padding:0 12px;text-decoration:none;position:relative;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:0.78rem}
 .sidebar-btn:hover{background:var(--surface2);color:var(--text)}
 .sidebar-btn.active{background:var(--accent-dim);color:var(--accent2)}
-.sidebar-btn .badge{position:absolute;top:2px;right:2px;width:6px;height:6px;border-radius:50%;background:var(--green)}
-.sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;padding-bottom:8px}
+.sidebar-btn .sb-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0}
+.sidebar-btn .badge{position:absolute;top:6px;right:8px;width:6px;height:6px;border-radius:50%;background:var(--green)}
+.sidebar-bottom{margin-top:auto;border-top:1px solid var(--border);padding:8px 10px}
 
-.content-wrap{margin-left:56px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.content-wrap{margin-left:180px;flex:1;display:flex;flex-direction:column;min-height:100vh}
 
 .view{display:none;flex:1;flex-direction:column}
 .view.active{display:flex}
@@ -52,8 +61,7 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(0.5);cursor:po
 
 .dash-main{flex:1;padding:40px 32px;max-width:980px;margin:0 auto;width:100%}
 
-.wiki-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:32px;margin-bottom:24px;position:relative;overflow:hidden}
-.wiki-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.wiki-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;margin-bottom:24px}
 .wiki-eyebrow{font-size:0.58rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
 .wiki-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:18px;flex-wrap:wrap}
 .wiki-title{font-family:'Fraunces',serif;font-size:1.55rem;color:var(--text);line-height:1.25}
@@ -84,10 +92,8 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(0.5);cursor:po
 .trend-metric-sub{font-size:0.62rem;color:var(--muted);margin-top:2px}
 
 .tracker-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:24px}
-.tracker-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:26px 22px;text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:all 0.2s;position:relative;overflow:hidden;cursor:pointer;font-family:inherit}
-.tracker-card:hover{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent-dim)}
-.tracker-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));opacity:0;transition:opacity 0.2s}
-.tracker-card:hover::after{opacity:1}
+.tracker-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px 20px;text-decoration:none;color:inherit;display:flex;flex-direction:column;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.tracker-card:hover{border-color:var(--accent);background:var(--surface2)}
 .tracker-icon{font-size:1.5rem;margin-bottom:14px}
 .tracker-sub{font-size:0.58rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
 .tracker-name{font-family:'Fraunces',serif;font-size:1.25rem;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px}
@@ -106,21 +112,9 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(0.5);cursor:po
 .create-card:hover{border-color:var(--accent);background:var(--surface)}
 .create-card .tracker-cta{color:var(--accent2)}
 
-.earn-section{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:32px;position:relative;overflow:hidden}
-.earn-section::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2),#e07070,#e8a870)}
-.earn-eyebrow{font-size:0.58rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
-.earn-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
-.earn-title{font-family:'Fraunces',serif;font-size:1.35rem;color:var(--text)}
 .coming-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)}
 .earn-desc{font-size:0.72rem;color:var(--muted);line-height:1.8;margin-bottom:24px;max-width:600px}
-.earn-features{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:24px}
-.earn-feat{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px}
-.earn-feat-icon{font-size:1.1rem;margin-bottom:8px}
-.earn-feat-title{font-size:0.75rem;color:var(--text);margin-bottom:4px}
-.earn-feat-desc{font-size:0.65rem;color:var(--muted);line-height:1.6}
-.earn-cta{font-size:0.65rem;color:var(--muted);display:flex;align-items:center;gap:8px}
-.earn-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
 
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:none;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
@@ -305,26 +299,27 @@ input[type=file]{display:none}
 .m-tab.active{border-color:var(--accent);color:var(--accent2);background:var(--surface2)}
 .empty-state{text-align:center;padding:48px 20px;color:var(--muted);font-size:0.78rem;line-height:1.9}
 .es-icon{font-size:2rem;margin-bottom:12px;opacity:0.35}
-#fig-chat-panel{position:fixed;right:0;top:0;bottom:0;width:380px;background:var(--surface);border-left:1px solid var(--border);display:none;flex-direction:column;z-index:500;transition:transform 0.3s ease}
-#fig-chat-panel.open{display:flex}
-.chat-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
-.chat-title{font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)}
-.chat-close{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:2px 6px}
-.chat-messages{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px}
-.chat-msg{max-width:88%;padding:10px 14px;border-radius:12px;font-size:0.78rem;line-height:1.6}
-.chat-msg.user{background:var(--accent);color:var(--bg);align-self:flex-end;border-radius:12px 12px 2px 12px}
-.chat-msg.assistant{background:var(--surface2);color:var(--text);align-self:flex-start;border-radius:12px 12px 12px 2px}
-.chat-msg.system{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:0.68rem;align-self:center;text-align:center;border-radius:8px}
-.chat-thinking{background:var(--surface2);color:var(--muted);align-self:flex-start;padding:10px 14px;border-radius:12px;font-size:0.78rem;display:none}
+#fig-chat-panel{position:fixed;right:0;top:0;bottom:0;width:420px;background:var(--surface);border-left:1px solid var(--border);display:none;flex-direction:column;z-index:500;box-shadow:-4px 0 24px rgba(0,0,0,0.3)}
+.chat-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.chat-title{font-family:'Fraunces',serif;font-size:0.95rem;color:var(--text);display:flex;align-items:center;gap:8px}
+.chat-title .chat-badge{font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:2px 6px}
+.chat-close{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:2px 6px;border-radius:6px;transition:all 0.15s}
+.chat-close:hover{color:var(--text);background:var(--surface2)}
+.chat-messages{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:10px}
+.chat-msg{max-width:85%;padding:10px 14px;border-radius:10px;font-size:0.78rem;line-height:1.6}
+.chat-msg.user{background:var(--accent);color:var(--bg);align-self:flex-end}
+.chat-msg.assistant{background:var(--surface2);color:var(--text);align-self:flex-start}
+.chat-msg.system{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:0.68rem;align-self:center;text-align:center;border-radius:8px;max-width:90%}
+.chat-thinking{color:var(--muted);font-size:0.72rem;padding:8px 0 4px 4px;display:none}
 .chat-thinking.show{display:block}
-.chat-input-area{padding:14px 16px;border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:8px}
+.chat-input-area{padding:14px 16px;border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:8px;background:var(--surface)}
 .chat-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:0.78rem;outline:none;resize:none;max-height:100px}
 .chat-input:focus{border-color:var(--accent)}
-.chat-send{padding:10px 14px;background:var(--accent);border:none;border-radius:8px;color:var(--bg);cursor:pointer;font-size:14px;font-weight:bold;transition:opacity 0.15s}
+.chat-send{width:36px;height:36px;background:var(--accent);border:none;border-radius:8px;color:var(--bg);cursor:pointer;font-size:16px;transition:opacity 0.15s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .chat-send:disabled{opacity:0.4;cursor:not-allowed}
-.chat-suggested{padding:0 16px 12px;display:flex;flex-wrap:wrap;gap:6px}
-.sug-btn{padding:4px 10px;border:1px solid var(--border);border-radius:14px;font-size:0.63rem;color:var(--muted);cursor:pointer;background:transparent;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;transition:all 0.15s}
-.sug-btn:hover{border-color:var(--accent);color:var(--accent)}
+.chat-suggested{padding:8px 16px 12px;display:flex;flex-wrap:wrap;gap:6px}
+.sug-btn{padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:0.62rem;color:var(--muted);cursor:pointer;background:transparent;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;transition:all 0.15s}
+.sug-btn:hover{border-color:var(--accent);color:var(--accent2)}
 #upload-banner{display:none;background:var(--surface2);border:1px solid var(--accent);border-radius:10px;padding:14px 20px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;font-size:0.73rem}
 #upload-banner.hidden{display:none}
 .banner-text{color:var(--accent2)}
@@ -343,9 +338,16 @@ input[type=file]{display:none}
   .tracker-grid{grid-template-columns:1fr}
   .trends-metrics{grid-template-columns:1fr}
 }
+@media(max-width:720px){
+  .sidebar{width:56px}
+  .sidebar-logo{font-size:1.1rem;padding:14px 0;text-align:center}
+  .sidebar-btn{justify-content:center;padding:0;gap:0;font-size:1.1rem;height:40px;width:40px;margin:0 auto}
+  .sidebar-btn .sb-icon{margin:0}
+  .sidebar-btn span:not(.sb-icon){display:none}
+  .content-wrap{margin-left:56px}
+}
 @media(max-width:640px){
   .trends-metrics{grid-template-columns:1fr}
-  .earn-features{grid-template-columns:1fr}
   .dash-main,.top-bar,.dash-footer{padding-left:20px;padding-right:20px}
   .dash-footer{flex-direction:column;gap:10px;text-align:center}
 }
@@ -362,15 +364,15 @@ input[type=file]{display:none}
 
 <!-- ── Sidebar ── -->
 <nav class="sidebar">
-  <a href="#" class="sidebar-logo" onclick="navigateTo('dashboard')" title="Dashboard">F</a>
+  <a href="#" class="sidebar-logo" onclick="navigateTo('dashboard')" title="Dashboard">Fig</a>
   <div class="sidebar-nav">
-    <button class="sidebar-btn active" data-view="dashboard" onclick="navigateTo('dashboard')" title="Dashboard">🏠</button>
-    <button class="sidebar-btn" data-view="health" onclick="navigateTo('health')" title="Health">🏃</button>
-    <button class="sidebar-btn" data-view="finance" onclick="navigateTo('finance')" title="Finance">📊</button>
-    <button class="sidebar-btn" id="fig-chat-btn" onclick="figToggleGlobalChat()" title="Ask Fig" style="font-size:0.9rem">💬</button>
+    <button class="sidebar-btn active" data-view="dashboard" onclick="navigateTo('dashboard')"><span class="sb-icon">📋</span> Dashboard</button>
+    <button class="sidebar-btn" data-view="health" onclick="navigateTo('health')"><span class="sb-icon">🏃</span> Health</button>
+    <button class="sidebar-btn" data-view="finance" onclick="navigateTo('finance')"><span class="sb-icon">📊</span> Finance</button>
+    <button class="sidebar-btn" id="fig-chat-btn" onclick="figToggleGlobalChat()"><span class="sb-icon">💬</span> Ask Fig</button>
   </div>
   <div class="sidebar-bottom">
-    <button class="sidebar-btn" onclick="openSettings()" title="Settings">⚙</button>
+    <button class="sidebar-btn" onclick="openSettings()"><span class="sb-icon">⚙</span> Settings</button>
   </div>
 </nav>
 
@@ -452,35 +454,7 @@ input[type=file]{display:none}
         </button>
       </div>
 
-      <div class="earn-section">
-        <div class="earn-eyebrow">Coming soon</div>
-        <div class="earn-header">
-          <div class="earn-title">Fig Earn</div>
-          <div class="coming-badge">In development</div>
-        </div>
-        <div class="earn-desc">A rewards layer for people who consistently show up — financially and physically. Your habits become an asset. Long-term, we're exploring World ID + AgentKit so insurers and public programs can sponsor lower rates and rebates for healthy, financially responsible members — no Plaid, no data middlemen, you stay in control.</div>
-        <div class="earn-features">
-          <div class="earn-feat">
-            <div class="earn-feat-icon">💳</div>
-            <div class="earn-feat-title">Better rates</div>
-            <div class="earn-feat-desc">Consistent savers and healthy habits unlock better financial product rates from Fig partners.</div>
-          </div>
-          <div class="earn-feat">
-            <div class="earn-feat-icon">🏆</div>
-            <div class="earn-feat-title">Habit rewards</div>
-            <div class="earn-feat-desc">Hit your targets across health and finance for streaks that convert to real cashback and perks.</div>
-          </div>
-          <div class="earn-feat">
-            <div class="earn-feat-icon">🔒</div>
-            <div class="earn-feat-title">Your data, your terms</div>
-            <div class="earn-feat-desc">You choose what to share, if anything. Fig will never sell your data. Rewards are opt-in only.</div>
-          </div>
-        </div>
-        <div class="earn-cta">
-          <div class="earn-dot"></div>
-          Build your streak now — it counts toward your Earn score when we launch
-        </div>
-      </div>
+
     </div>
 
     <div class="dash-footer">
@@ -548,6 +522,9 @@ input[type=file]{display:none}
       <hr class="divider">
       <div class="section-title">Workouts</div>
       <div id="health-workouts"></div>
+      <hr class="divider">
+      <div class="section-title">Meals</div>
+      <div id="health-meals-content"></div>
       <hr class="divider">
       <div class="section-title">Import / Export</div>
       <div id="health-csv-section"></div>
@@ -762,13 +739,21 @@ input[type=file]{display:none}
       </div>
       <div class="settings-section" id="sec-wid">
         <h4>World ID <span id="wid-status"></span></h4>
-        <div class="section-meta">Sybil-resistant proof-of-personhood. <a href="https://github.com/GGuberman/fig/blob/main/SPEC-WORLDID.md" target="_blank">Read the spec</a>.</div>
+        <div class="section-meta">Sybil-resistant proof-of-personhood. Uses IDKit Core v4.</div>
         <div id="wid-form">
           <div class="field-row">
             <label>App ID</label>
-            <input id="wid-app-id" type="text" placeholder="app_staging_... or app_... (leave blank to fetch from Worker)" autocomplete="off">
+            <input id="wid-app-id" type="text" placeholder="app_..." autocomplete="off">
           </div>
-          <div class="field-help" style="margin-bottom:10px">Enter your World ID App ID, or leave blank to fetch from a deployed Worker.</div>
+          <div class="field-row">
+            <label>RP ID</label>
+            <input id="wid-rp-id" type="text" placeholder="rp_... (from Developer Portal)" autocomplete="off">
+          </div>
+          <div class="field-row">
+            <label>Signing Key</label>
+            <input id="wid-signing-key" type="password" placeholder="Hex signing key (keep secret — never share)" autocomplete="off">
+          </div>
+          <div class="field-help" style="margin-bottom:10px">Create an app at <a href="https://developer.world.org" target="_blank">developer.world.org</a> and enable World ID 4.0. Get your App ID, RP ID, and Signing Key from the portal. Your keys stay on this device.</div>
           <div class="btn-row">
             <button class="s-btn primary" onclick="connectWorldId()">Sign in with World ID</button>
             <span class="s-toast" id="wid-toast"></span>
@@ -1247,14 +1232,16 @@ function scheduleAutoSync(){
   const s=getSync(); const acc=getAccount();
   if (!s.autoSync || !s.workerUrl || !acc.worker?.token) return;
   clearTimeout(_autoSyncTimer);
-  _autoSyncTimer = setTimeout(() => {
-    fetch(s.workerUrl+'/data',{
-      method:'PUT',
-      headers:{'Authorization':'Bearer '+acc.worker.token,'Content-Type':'application/json'},
-      body:JSON.stringify(collectLocalState())
-    }).then(r=>r.ok?r.json():null).then(d=>{
-      if (d?.savedAt) { s.lastSyncedAt=d.savedAt; lsSet(SYNC_KEY,s); }
-    }).catch(()=>{});
+  _autoSyncTimer = setTimeout(async () => {
+    try {
+      const payload = await collectLocalState();
+      const r = await fetch(s.workerUrl+'/data',{
+        method:'PUT',
+        headers:{'Authorization':'Bearer '+acc.worker.token,'Content-Type':'application/json'},
+        body:JSON.stringify(payload)
+      });
+      if (r.ok) { const d=await r.json(); if(d?.savedAt){s.lastSyncedAt=d.savedAt;lsSet(SYNC_KEY,s);} }
+    } catch(e) {}
   }, 5000);
 }
 
@@ -1291,6 +1278,14 @@ function setSettingsTab(tab){
 
 function renderIdentity(){
   const acc=getAccount();
+  const cfg=figGetConfig();
+  // Restore World ID settings fields
+  const widAppIdEl=document.getElementById('wid-app-id');
+  const widRpIdEl=document.getElementById('wid-rp-id');
+  const widSigningEl=document.getElementById('wid-signing-key');
+  if(widAppIdEl&&cfg.worldIdAppId&&!widAppIdEl.value)widAppIdEl.value=cfg.worldIdAppId;
+  if(widRpIdEl&&cfg.worldRpId&&!widRpIdEl.value)widRpIdEl.value=cfg.worldRpId;
+  if(widSigningEl&&cfg.worldSigningKey&&!widSigningEl.value)widSigningEl.value=cfg.worldSigningKey;
   const wConnected = acc.worker && acc.worker.handle && acc.worker.token;
   document.getElementById('worker-form').style.display       = wConnected?'none':'';
   document.getElementById('worker-connected').style.display  = wConnected?'':'none';
@@ -1429,57 +1424,89 @@ async function connectWorldId(){
   toast.className='s-toast';
   const acc=getAccount();
   const sync=getSync();
-  var appId=document.getElementById('wid-app-id')?.value?.trim();
+  const appId=document.getElementById('wid-app-id')?.value?.trim();
+  const rpId=document.getElementById('wid-rp-id')?.value?.trim();
+  const signingKey=document.getElementById('wid-signing-key')?.value?.trim();
   var signal = 'fig-user';
   if (acc.worker?.handle) signal = acc.worker.handle;
-  if (!appId) {
-    if (!sync.workerUrl) {
+  if (!appId) { toast.classList.add('err'); toast.textContent='App ID is required. Get one from developer.world.org.'; return; }
+  if (!rpId) { toast.classList.add('err'); toast.textContent='RP ID is required. Get one from developer.world.org.'; return; }
+  if (!signingKey) { toast.classList.add('err'); toast.textContent='Signing Key is required. Get one from developer.world.org.'; return; }
+  // Persist World ID settings
+  const _cfg=figGetConfig();
+  _cfg.worldIdAppId=appId; _cfg.worldRpId=rpId; _cfg.worldSigningKey=signingKey;
+  figSetConfig(_cfg);
+
+  // Try new IDKit Core v4 first, fall back to standalone v1
+  var kit = window.__figIDKit;
+  if (!kit) {
+    toast.textContent='Waiting for IDKit Core library…';
+    for(var _i=0;_i<50;_i++){await new Promise(function(r){setTimeout(r,100)});kit=window.__figIDKit;if(kit)break;}
+  }
+  if (!kit) {
+    // Fallback to old standalone
+    var old = window.IDKit;
+    if (!old) {
       toast.classList.add('err');
-      toast.textContent='Enter a World ID App ID above, or set the Worker URL on the Cloud sync tab.';
+      toast.textContent='IDKit couldn\'t load. Check your network.';
       return;
     }
-    toast.textContent='Loading config from Worker…';
-    const wcfg=await loadFigWorldConfig();
-    if (!wcfg || !wcfg.worldIdAppId) {
-      toast.classList.add('err');
-      toast.textContent='Worker has no WORLD_ID_APP_ID. Enter one above or configure the Worker.';
-      return;
+    toast.textContent='Using legacy fallback. Open World App…';
+    try {
+      const result = await old.init({ app_id: appId, action: 'verify-human', signal: signal, verification_level: 'orb' });
+      const acc2=getAccount();
+      acc2.worldid={nullifier_hash:result.nullifier_hash, verification_level:result.verification_level||'orb', verifiedAt:new Date().toISOString(), _legacy:true};
+      const cfg=figGetConfig(); cfg.identity=acc2; figSetConfig(cfg);
+      toast.classList.add('ok'); toast.textContent='Verified (legacy).';
+      renderIdentity();
+    } catch(e) {
+      toast.classList.add('err'); toast.textContent='Failed: '+(e?.message||e);
     }
-    appId = wcfg.worldIdAppId;
-  }
-  var idkitGlobal = window.IDKit;
-  if (!idkitGlobal) {
-    toast.textContent='Waiting for IDKit library…';
-    for(var _i=0;_i<50;_i++){await new Promise(function(r){setTimeout(r,100)});idkitGlobal=window.IDKit;if(idkitGlobal)break;}
-  }
-  if (!idkitGlobal) {
-    toast.classList.add('err');
-    toast.textContent='IDKit didn\'t load after 5s. Check your network or refresh. If you use a content blocker, allow cdn.jsdelivr.net.';
     return;
   }
-  toast.textContent='Open World App on your phone and scan the QR…';
+
+  toast.textContent='Generating request…';
   try {
-    const result = await idkitGlobal.init({
+    var {sig, nonce, createdAt, expiresAt} = kit.signRequest({ signingKeyHex: signingKey, action: 'verify-human' });
+    var request = await kit.IDKit.request({
       app_id: appId,
       action: 'verify-human',
-      signal: signal,
-      verification_level: 'orb',
+      rp_context: { rp_id: rpId, nonce: nonce, created_at: createdAt, expires_at: expiresAt, signature: sig },
+      allow_legacy_proofs: true,
+      environment: 'production',
+    }).preset(kit.orbLegacy({ signal: signal }));
+    toast.textContent='Open World App on your phone, then scan this URL:';
+    var urlEl = document.createElement('div');
+    urlEl.style.cssText = 'margin:12px 0;padding:10px;background:var(--bg);border-radius:8px;word-break:break-all;font-size:0.7rem;color:var(--accent2);font-family:monospace';
+    urlEl.textContent = request.connectorURI;
+    toast.parentNode.insertBefore(urlEl, toast.nextSibling);
+    var statusEl = document.createElement('div');
+    statusEl.style.cssText = 'margin-top:8px;font-size:0.68rem;color:var(--muted)';
+    statusEl.textContent = 'Waiting for verification… (scan with your phone)';
+    urlEl.parentNode.insertBefore(statusEl, urlEl.nextSibling);
+    toast.textContent='';
+    var response = await request.pollUntilCompletion();
+    urlEl.remove();
+    statusEl.remove();
+    var verifyRes = await fetch('https://developer.world.org/api/v4/verify/' + rpId, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(response)
     });
-    const acc2=getAccount();
-    acc2.worldid={nullifier_hash:result.nullifier_hash, verification_level:result.verification_level||'orb', verifiedAt:new Date().toISOString()};
-    const cfg=figGetConfig(); cfg.identity=acc2; figSetConfig(cfg);
-    toast.classList.add('ok'); toast.textContent='Verified.';
-    renderIdentity();
-    if (sync.workerUrl && acc.worker?.token && acc.worldid?.nullifier_hash !== result.nullifier_hash) {
-      toast.textContent='Verified locally. Syncing with Worker…';
-      try {
-        await fetch(sync.workerUrl.replace(/\/$/,'')+'/auth/worldid/verify',{
-          method:'POST',
-          headers:{'Authorization':'Bearer '+acc.worker.token,'Content-Type':'application/json'},
-          body:JSON.stringify({proof:result, action:'verify-human', signal:signal})
-        });
-      } catch(e) {}
+    if (!verifyRes.ok) {
+      toast.textContent='Proof obtained but cloud verification failed (CORS). Storing locally.';
+    } else {
+      toast.textContent='Verified by Developer Portal.';
     }
+    const acc2=getAccount();
+    acc2.worldid={
+      nullifier_hash: response.responses?.[0]?.nullifier || response.responses?.[0]?.session_nullifier?.[0] || 'pending',
+      verification_level: 'orb',
+      verifiedAt: new Date().toISOString(),
+      response: response,
+    };
+    const cfg=figGetConfig(); cfg.identity=acc2; figSetConfig(cfg);
+    toast.classList.add('ok'); toast.textContent='Connected.';
+    renderIdentity();
   } catch(e) {
     toast.classList.add('err');
     toast.textContent='Failed: '+(e?.message||e);
@@ -1639,10 +1666,10 @@ async function syncNow(){
   const acc=getAccount();
   const t=document.getElementById('sync-toast'); t.className='s-toast'; t.textContent='';
   if (!s.workerUrl) {t.classList.add('err');t.textContent='Set Worker URL first.';return;}
-  if (!acc.worker?.token) {t.classList.add('err');t.textContent='Sign in with a handle on the Identity tab first.';return;}
+  if (!acc.worker?.token) {t.classList.add('err');t.content='Sign in with a handle on the Identity tab first.';return;}
   t.textContent='Uploading…';
   try {
-    const payload = collectLocalState();
+    const payload = await collectLocalState();
     const r=await fetch(s.workerUrl+'/data',{
       method:'PUT',
       headers:{'Authorization':'Bearer '+acc.worker.token,'Content-Type':'application/json'},
@@ -1655,6 +1682,7 @@ async function syncNow(){
   } catch(e) {
     t.classList.add('err'); t.textContent='Failed: '+(e.message||e);
   }
+}
 }
 
 async function pullCloud(){
@@ -1669,7 +1697,7 @@ async function pullCloud(){
     if (!r.ok) throw new Error('HTTP '+r.status);
     const d=await r.json();
     if (!d.data) {t.classList.add('err');t.textContent='No cloud data found.';return;}
-    applyLocalState(d.data);
+    await applyLocalState(d.data);
     t.classList.add('ok'); t.textContent='Pulled. Reloading…';
     setTimeout(()=>window.location.reload(),800);
   } catch(e) {
@@ -1677,20 +1705,68 @@ async function pullCloud(){
   }
 }
 
-function collectLocalState(){
-  const out={ts:Date.now(),version:2,localStorage:{}};
+async function collectLocalState(){
+  const out={ts:Date.now(),version:3,localStorage:{},indexedDB:{}};
+  // Collect localStorage (sync)
   Object.keys(localStorage).forEach(k=>{
     if (k.startsWith('fig_') || k==='ht_v4') out.localStorage[k]=localStorage.getItem(k);
   });
+  // Collect IndexedDB (finance data)
+  try {
+    const req=indexedDB.open('fig_v1',2);
+    const db=await new Promise((res,rej)=>{req.onsuccess=e=>res(e.target.result);req.onerror=()=>rej(null);req.onupgradeneeded=()=>{};});
+    if(db&&db.objectStoreNames.contains('config')){
+      const tx=db.transaction(['config','months','chat','snapshots'],'readonly');
+      // config
+      const cfgReq=tx.objectStore('config').get('main');
+      out.indexedDB.config=await new Promise(r=>{cfgReq.onsuccess=()=>r(cfgReq.result||null);cfgReq.onerror=()=>r(null);});
+      // months
+      const monStore=tx.objectStore('months');
+      const monKeys=await new Promise(r=>{const kr=monStore.getAllKeys();kr.onsuccess=()=>r(kr.result);kr.onerror=()=>r([]);});
+      out.indexedDB.months={};
+      for(const k of monKeys){
+        const mr=monStore.get(k);
+        out.indexedDB.months[k]=await new Promise(r=>{mr.onsuccess=()=>r(mr.result);mr.onerror=()=>r(null);});
+      }
+      // snapshots
+      const snapStore=tx.objectStore('snapshots');
+      const snapAll=await new Promise(r=>{const sr=snapStore.getAll();sr.onsuccess=()=>r(sr.result);sr.onerror=()=>r([]);});
+      out.indexedDB.snapshots=snapAll;
+      // chat
+      const chatAll=await new Promise(r=>{const cr=tx.objectStore('chat').getAll();cr.onsuccess=()=>r(cr.result);cr.onerror=()=>r([]);});
+      out.indexedDB.chat=chatAll;
+    }
+  }catch(e){/* IndexedDB not available or no data */}
   return out;
 }
-function applyLocalState(state){
-  if (!state||!state.localStorage) return;
-  Object.entries(state.localStorage).forEach(([k,v])=>{try{localStorage.setItem(k,v);}catch{}});
+async function applyLocalState(state){
+  if (!state) return;
+  // Restore localStorage
+  if(state.localStorage) Object.entries(state.localStorage).forEach(([k,v])=>{try{localStorage.setItem(k,v);}catch{}});
+  // Restore IndexedDB
+  if(state.indexedDB&&state.indexedDB.config){
+    try{
+      const req=indexedDB.open('fig_v1',2);
+      const db=await new Promise((res,rej)=>{req.onsuccess=e=>res(e.target.result);req.onerror=()=>rej(null);req.onupgradeneeded=e=>{
+        const d=e.target.result;
+        if(!d.objectStoreNames.contains('config'))d.createObjectStore('config');
+        if(!d.objectStoreNames.contains('months'))d.createObjectStore('months');
+        if(!d.objectStoreNames.contains('chat'))d.createObjectStore('chat',{keyPath:'id',autoIncrement:true});
+        if(!d.objectStoreNames.contains('snapshots'))d.createObjectStore('snapshots',{keyPath:'ts'});
+      };});
+      if(!db)return;
+      const tx=db.transaction(['config','months','snapshots','chat'],'readwrite');
+      if(state.indexedDB.config) tx.objectStore('config').put(state.indexedDB.config,'main');
+      if(state.indexedDB.months) Object.entries(state.indexedDB.months).forEach(([k,v])=>{if(v)tx.objectStore('months').put(v,k);});
+      if(state.indexedDB.snapshots) state.indexedDB.snapshots.forEach(s=>{tx.objectStore('snapshots').put(s);});
+      if(state.indexedDB.chat) state.indexedDB.chat.forEach(c=>{tx.objectStore('chat').put(c);});
+    }catch(e){}
+  }
 }
 
-function exportLocal(){
-  const blob=new Blob([JSON.stringify(collectLocalState(),null,2)],{type:'application/json'});
+async function exportLocal(){
+  const state=await collectLocalState();
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob); a.download=`fig-export-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
@@ -1700,11 +1776,11 @@ function exportLocal(){
 function importLocal(ev){
   const f=ev.target.files?.[0]; if (!f) return;
   const reader=new FileReader();
-  reader.onload=()=>{
+  reader.onload=async()=>{
     try {
       const state=JSON.parse(reader.result);
       if (!confirm('Import will overwrite local Fig data. Continue?')) return;
-      applyLocalState(state);
+      await applyLocalState(state);
       const t=document.getElementById('sync-toast');t.className='s-toast ok';t.textContent='Imported. Reloading…';
       setTimeout(()=>window.location.reload(),800);
     } catch(e) {
@@ -1716,12 +1792,22 @@ function importLocal(ev){
 
 document.addEventListener('input', e => {
   if (e.target && (e.target.id==='sync-url' || e.target.id==='sync-auto')) persistSyncSettings();
+  if (e.target && (e.target.id==='wid-app-id' || e.target.id==='wid-rp-id' || e.target.id==='wid-signing-key')) {
+    const _c=figGetConfig();
+    _c.worldIdAppId=document.getElementById('wid-app-id')?.value?.trim()||_c.worldIdAppId||'';
+    _c.worldRpId=document.getElementById('wid-rp-id')?.value?.trim()||_c.worldRpId||'';
+    _c.worldSigningKey=document.getElementById('wid-signing-key')?.value?.trim()||_c.worldSigningKey||'';
+    figSetConfig(_c);
+  }
 });
 
 async function init(){
   const health=getHealthData();
-  const finance=await getFinanceData();
+  // Render health immediately (sync) — don't block on IndexedDB
   renderHealth(health);
+  // Load finance data asynchronously (IndexedDB open may be slow after DB deletion)
+  var finance = null;
+  try { finance = await getFinanceData(); } catch(e) {}
   renderFinance(finance);
   renderTrends(health,finance);
   renderAuthChip();

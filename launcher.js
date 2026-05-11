@@ -425,41 +425,66 @@ async function figToggleWid() {
   var ident = cfg.identity || {};
   var sync = figGetSync();
   var appId = cfg.worldIdAppId || '';
-  if (!appId && sync.workerUrl) {
-    toast.className = 'fig-toast';
-    toast.textContent = 'Loading config…';
-    try {
-      var cfgResp = await fetch(sync.workerUrl.replace(/\/$/, '') + '/config');
-      if (cfgResp.ok) { var wcfg = await cfgResp.json(); appId = wcfg.worldIdAppId || ''; }
-    } catch (e) {}
-  }
+  var rpId = cfg.worldRpId || '';
+  var signingKey = cfg.worldSigningKey || '';
   if (!appId) {
     toast.className = 'fig-toast err';
     toast.textContent = 'Set an App ID in Settings → World ID first.';
     return;
   }
   var signal = ident.worker?.handle || 'fig-user';
-  var idkit = window.IDKit;
-  if (!idkit) {
+
+  // Try IDKit Core v4 first
+  var kit = window.__figIDKit;
+  if (!kit) {
     toast.textContent = 'Waiting for IDKit library…';
-    for(var _i=0;_i<50;_i++){await new Promise(function(r){setTimeout(r,100)});idkit=window.IDKit;if(idkit)break;}
+    for(var _i=0;_i<50;_i++){await new Promise(function(r){setTimeout(r,100)});kit=window.__figIDKit;if(kit)break;}
   }
-  if (!idkit) { toast.className = 'fig-toast err'; toast.textContent = 'IDKit not loaded after 5s. Check your network or refresh. If you use a content blocker, allow cdn.jsdelivr.net.'; return; }
-  toast.textContent = 'Open World App on your phone to scan the QR…';
+
+  if (kit && rpId && signingKey) {
+    toast.textContent = 'Generating request…';
+    try {
+      var {sig, nonce, createdAt, expiresAt} = kit.signRequest({ signingKeyHex: signingKey, action: 'verify-human' });
+      var request = await kit.IDKit.request({
+        app_id: appId, action: 'verify-human',
+        rp_context: { rp_id: rpId, nonce, created_at: createdAt, expires_at: expiresAt, signature: sig },
+        allow_legacy_proofs: true,
+        environment: 'production',
+      }).preset(kit.orbLegacy({ signal }));
+      toast.textContent = 'Open World App on your phone…';
+      var response = await request.pollUntilCompletion();
+      var cfg2 = figGetConfig();
+      if (!cfg2.identity) cfg2.identity = {};
+      cfg2.identity.worldid = {
+        nullifier_hash: response.responses?.[0]?.nullifier || response.responses?.[0]?.session_nullifier?.[0] || 'pending',
+        verification_level: 'orb', verifiedAt: new Date().toISOString(), response
+      };
+      cfg2.worldIdAppId = appId;
+      figSetConfig(cfg2);
+      toast.className = 'fig-toast ok';
+      toast.textContent = 'Connected.';
+      render();
+      return;
+    } catch (e) {
+      toast.className = 'fig-toast err';
+      toast.textContent = 'Failed: ' + (e.message || e);
+      return;
+    }
+  }
+
+  // Fallback to old standalone
+  var old = window.IDKit;
+  if (!old) { toast.className = 'fig-toast err'; toast.textContent = 'IDKit not loaded after 5s.'; return; }
+  toast.textContent = 'Open World App on your phone to scan…';
   try {
-    var result = await idkit.init({
-      app_id: appId,
-      action: 'verify-human',
-      signal: signal,
-      verification_level: 'orb',
-    });
+    var result = await old.init({ app_id: appId, action: 'verify-human', signal: signal, verification_level: 'orb' });
     var cfg2 = figGetConfig();
     if (!cfg2.identity) cfg2.identity = {};
-    cfg2.identity.worldid = { nullifier_hash: result.nullifier_hash, verification_level: result.verification_level || 'orb', verifiedAt: new Date().toISOString() };
+    cfg2.identity.worldid = { nullifier_hash: result.nullifier_hash, verification_level: result.verification_level || 'orb', verifiedAt: new Date().toISOString(), _legacy: true };
     cfg2.worldIdAppId = appId;
     figSetConfig(cfg2);
     toast.className = 'fig-toast ok';
-    toast.textContent = 'Verified.';
+    toast.textContent = 'Verified (legacy).';
     render();
     if (sync.workerUrl && ident.worker?.token) {
       toast.textContent = 'Syncing with Worker…';
